@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore Modulistica Ufficiale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman, serif');
+        body {
+            background-color: #e2e8f0;
+        }
+        /* MODIFICA: Stili del contenitore della pagina resi responsivi */
+        .page-container {
+            width: 100%;
+            max-width: 210mm; /* Mantiene la larghezza massima di un A4 */
+            min-height: 297mm;
+            padding: 1rem; /* Padding ridotto per schermi piccoli */
+            margin: 1rem auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            font-family: 'Times New Roman', serif;
+            font-size: 11pt; /* La dimensione del font è ok per la stampa */
+            line-height: 1.8;
+        }
+        /* Media query per schermi più grandi (tablet e desktop) */
+        @media (min-width: 768px) {
+            .page-container {
+                padding: 18mm; /* Ripristina il padding originale */
+            }
+        }
+        h2 { font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 1.5rem; text-transform: uppercase; }
+        .header { text-align: right; margin-bottom: 2rem; font-weight: bold; }
+        
+        .editable-field {
+            display: inline-block;
+            min-width: 80px;
+            border-bottom: 1px dotted #333;
+            padding: 0 2px;
+            background-color: #f8fafc;
+            cursor: text;
+            vertical-align: baseline;
+        }
+        .editable-field:focus {
+            outline: none;
+            background-color: #eff6ff;
+            border-bottom: 1px solid #3b82f6;
+        }
+        .editable-field:empty::before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+            font-style: italic;
+            cursor: text;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: start;
+            gap: 0 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .checkbox { 
+            width: 1.1rem; 
+            height: 1.1rem; 
+            border: 1px solid #333; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+        .section { margin-bottom: 1.5rem; }
+        .text-justify { text-align: justify; }
+
+        /* MODIFICA: Sezione firma resa responsiva */
+        .signature-section { 
+            margin-top: 3.5rem; 
+            display: flex; 
+            flex-direction: column; /* Impilamento verticale su mobile */
+            gap: 2.5rem; /* Spazio tra le firme */
+        }
+        @media (min-width: 768px) {
+            .signature-section {
+                flex-direction: row; /* Layout orizzontale su schermi grandi */
+                justify-content: space-between;
+                gap: 0;
+            }
+        }
+        .signature-box { 
+            width: 100%; /* Larghezza piena su mobile */
+            text-align: center; 
+        }
+        @media (min-width: 768px) {
+            .signature-box {
+                width: 45%; /* Ripristina larghezza per desktop */
+            }
+        }
+        .signature-line { border-top: 1px dotted #333; margin-top: 2.5rem; }
+        
+        /* MODIFICA: Contenitore pulsante di stampa reso responsivo */
+        .print-button-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+        @media (min-width: 768px) {
+            .print-button-container {
+                top: 20px;
+                right: 20px;
+                bottom: auto;
+                left: auto;
+                background: none;
+                backdrop-filter: none;
+                padding: 0;
+                border-top: none;
+            }
+        }
+        .print-button-container button {
+            width: 100%;
+        }
+         @media (min-width: 768px) {
+            .print-button-container button {
+                width: auto;
+            }
+         }
+
+        @media print {
+            body { background-color: white; }
+            .page-container { margin: 0; padding: 15mm; box-shadow: none; border: none; max-width: none; }
+            .print-button-container { display: none; }
+            .editable-field { border-bottom: 1px dotted #ccc !important; background-color: white !important; }
+            /* Ripristina il layout flex per la stampa */
+            .signature-section { 
+                flex-direction: row !important; 
+                justify-content: space-between !important;
+            }
+            .signature-box {
+                width: 45% !important;
+            }
+        }
+    </style>
+</head>
+<body class="pb-24 md:pb-0"> <!-- Aggiunto padding-bottom per non sovrapporre il bottone -->
+
+    <div class="print-button-container">
+        <button onclick="window.print()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition">
+            Stampa / Salva PDF
+        </button>
+    </div>
+
+    <div id="modulistica-container">
+        <!-- I moduli verranno inseriti qui da JavaScript -->
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dataString = sessionStorage.getItem('modulisticaData');
+    const container = document.getElementById('modulistica-container');
+
+    if (!dataString) {
+        container.innerHTML = `<div class="page-container"><p class="text-center text-red-600 font-bold">Dati non trovati. Per favore, genera prima un quadro sanzionatorio dalla pagina principale.</p></div>`;
+        return;
+    }
+
+    const data = JSON.parse(dataString);
+    renderModules(data, container);
+});
+
+function renderModules(data, container) {
+    let modulesHtml = '';
+
+    const isSanitarioRichiesta = data.tipoAccertamento === 'sanitario' && data.contestoPrelievo === 'richiesta';
+    const anchePer187 = data.richiediTest187;
+    const requiresDifensore = data.isPenal || isSanitarioRichiesta;
+
+    // --- GENERA MOD 4: RICHIESTA ACCERTAMENTI URGENTI ---
+    if (isSanitarioRichiesta) {
+        modulesHtml += `
+            <div class="page-container">
+                <div class="header">MOD 4</div>
+                <h2>RICHIESTA DI ACCERTAMENTI URGENTI SULLA PERSONA (art. 354 c.p.p.) FINALIZZATI</h2>
+                <div class="section text-center mb-8">
+                    <div class="checkbox-grid max-w-md mx-auto"><div class="checkbox">X</div><div>ALL'ACCERTAMENTO DEL TASSO ALCOLEMICO (ART. 186 CDS)</div></div>
+                    <div class="checkbox-grid max-w-md mx-auto"><div class="checkbox">${anchePer187 ? 'X' : '&nbsp;'}</div><div>ALL'ACCERTAMENTO DELL'ASSUNZIONE DI SOSTANZE STUPEFACENTI O PSICOTROPE (ART. 187 CDS)</div></div>
+                </div>
+
+                <div class="section">
+                    <strong>ALLA DIREZIONE DELL'OSPEDALE DI&nbsp;</strong><span class="editable-field" contenteditable="true" data-placeholder="Nome Ospedale"></span>
+                </div>
+
+                <div class="section text-justify">
+                    <p>
+                        Il/i sottoscritto/i Ufficiale/Agente di P.G.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Qualifica, Nome e Cognome"></span>
+                        danno atto che il/la Sig./Sig.ra&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Nome Cognome Conducente"></span>
+                        nato/a a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo di nascita"></span>&nbsp;il&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data di nascita"></span>
+                        in qualità di conducente del veicolo&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Marca, modello e targa"></span>
+                        in data odierna alle ore&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="ora"></span>&nbsp;in&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo del fatto"></span>.
+                    </p>
+                    <div class="mt-4 checkbox-grid">
+                        <div class="checkbox">${data.haSinistro ? 'X' : '&nbsp;'}</div>
+                        <div>è rimasto coinvolto in incidente stradale ed è stato trasportato presso la suddetta struttura sanitaria ove si trova attualmente per le cure mediche del caso.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <p class="text-justify">Pertanto, i sottoscritti richiedono, ai sensi</p>
+                    <div class="pl-8">
+                        <div class="checkbox-grid"><div class="checkbox">X</div><div>dell'art. 186, comma 5, cds</div></div>
+                        <div class="checkbox-grid"><div class="checkbox">${anchePer187 ? 'X' : '&nbsp;'}</div><div>dell'art. 187, commi 3, 4 e 5, cds</div></div>
+                    </div>
+                    <p class="text-justify">Di effettuare, nei confronti del nominato conducente, previa acquisizione del consenso e informazione sulle garanzie difensive attraverso la compilazione e la sottoscrizione dei moduli allegati:</p>
+                    <div class="pl-8">
+                        <div class="checkbox-grid"><div class="checkbox">X</div><div>il prelievo di campioni di sangue intero per l'accertamento del tasso alcolemico</div></div>
+                        <div class="checkbox-grid"><div class="checkbox">${anchePer187 ? 'X' : '&nbsp;'}</div><div>il prelievo di campioni di sangue intero per la verifica della presenza e della relativa quantità di sostanze stupefacenti o psicotrope e/o metaboliti farmacologicamente attivi</div></div>
+                    </div>
+                    <p class="text-justify">e di trasmettere, con ogni cortese urgenza, all'Ufficio in intestazione:</p>
+                     <div class="pl-8">
+                        <div class="checkbox-grid"><div class="checkbox">X</div><div>copia della certificazione medica contenente l'esito dei predetti accertamenti, estesa alla prognosi delle lesioni accertate.</div></div>
+                     </div>
+                </div>
+                
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p>Richiesta del&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="data" style="min-width:80px;"></span>&nbsp;ore&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="ora" style="min-width:50px;"></span></p>
+                        <div class="signature-line"></div>
+                        <p>LA POLIZIA GIUDIZIARIA OPERANTE</p>
+                    </div>
+                    <div class="signature-box">
+                        <p>consegnata</p>
+                         <div class="signature-line"></div>
+                        <p>IL PERSONALE MEDICO PER RICEVUTA</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- GENERA MOD 1-bis: CONSENSO INFORMATO ---
+     if (isSanitarioRichiesta) {
+        const testoStupefacenti = anchePer187 ? "e/o di sostanze stupefacenti o psicotrope e/o loro metaboliti attivi" : "<del>e/o di sostanze stupefacenti o psicotrope e/o loro metaboliti attivi</del>";
+        const esprimoChecked = !data.rifiutoPrelievo ? 'X' : '&nbsp;';
+        const negoChecked = data.rifiutoPrelievo ? 'X' : '&nbsp;';
+
+        modulesHtml += `
+            <div class="page-container">
+                <div class="header">MOD 1-bis</div>
+                <h2>DICHIARAZIONE DI CONSENSO INFORMATO PER L'ESECUZIONE DI ACCERTAMENTI URGENTI DI CUI ALL'ART. 186/187 DEL CODICE DELLA STRADA</h2>
+                
+                <p>Io sottoscritto/a (cognome e nome)&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Nome Cognome Conducente"></span></p>
+                <p>nato/a il&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data e luogo di nascita"></span></p>
+                <h4 class="font-bold text-center my-6">DICHIARO</h4>
+                <p class="text-justify">
+                    di essere stato informato in modo comprensibile ed esauriente dal dott.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Nome del medico"></span>
+                    nominato ausiliario di polizia giudiziaria ai sensi dell'art. 348, comma 4, c.p.p., che gli accertamenti sanitari a cui mi appresto a sottopormi, ai sensi dell'art. 186/187 del Codice della Strada, consistono nella raccolta di due campioni di sangue intero per la verifica della presenza e relativa quantità di alcol ${testoStupefacenti}, che sarà eseguita a mezzo analisi tossicologico-forensi presso il laboratorio&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Denominazione e sede del laboratorio"></span>.
+                </p>
+                <p class="mt-4 text-justify">Confermo, inoltre:</p>
+                <ul class="list-disc pl-10 text-justify">
+                    <li>di essere stato informato che, in caso di rifiuto a sottopormi agli accertamenti sanitari suddetti, sarò passibile delle sanzioni penali e amministrative di cui all'art. 186, comma 7, del Codice della Strada;</li>
+                    <li>di essere stato informato che i risultati dei suddetti accertamenti sanitari saranno tempestivamente comunicati, ai sensi dell'art. 186/187 del Codice della Strada, all'Autorità che li ha richiesti e tutta la documentazione relativa agli stessi, compresa la presente dichiarazione, sarà custodita presso l'Ufficio in intestazione;</li>
+                    <li>che i miei dati personali, indispensabili per l'acquisizione del presente consenso informato e trattati nel rispetto di quanto previsto dal Regolamento (UE) 2016/679, d.lgs. n. 196/2003 e dal d.lgs. n. 51/2018, sono corretti.</li>
+                    <li>di essere stato informato della facoltà di farmi assistere da un difensore di fiducia, secondo quanto previsto dagli artt. 352-354-356 c.p.p.</li>
+                </ul>
+                <p class="mt-4 text-justify">Pertanto, liberamente, spontaneamente e consapevolmente,</p>
+                <div class="my-4 pl-8">
+                    <div class="checkbox-grid"><div class="checkbox">${esprimoChecked}</div><div>ESPRIMO</div></div>
+                    <div class="checkbox-grid"><div class="checkbox">${negoChecked}</div><div>NEGO IL MIO CONSENSO AGLI ACCERTAMENTI SANITARI SOPRA INDICATI.</div></div>
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Firma leggibile dell'interessato</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Timbro e Firma del medico</p>
+                    </div>
+                </div>
+            </div>
+        `;
+     }
+    
+    // --- GENERA MOD 6: AVVISO FACOLTÀ DIFENSORE ---
+    if (requiresDifensore) {
+         const tipoAccertamentoTesto = `prelievo ematico per la determinazione del tasso alcolemico ${anchePer187 ? "e per l'accertamento dell'assunzione di sostanze stupefacenti" : ""}`;
+         const sanitizedAvvocato = data.nomeAvvocato ? data.nomeAvvocato.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
+         modulesHtml += `
+            <div class="page-container">
+                <div class="header">MOD 6</div>
+                <h2>AVVISO DELLA FACOLTÀ DI FARSI ASSISTERE DA UN DIFENSORE DI FIDUCIA PER L'ESECUZIONE DI ACCERTAMENTI URGENTI DI CUI AGLI ARTICOLI 186 E/O 187 DEL CODICE DELLA STRADA</h2>
+                
+                <p class="text-justify">
+                    Il&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data"></span>&nbsp;alle ore&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Ora"></span>&nbsp;presso&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo"></span>
+                    il sottoscritto&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Nome, cognome e ruolo dell'operante"></span>
+                    ${isSanitarioRichiesta ? `<br>nominato Ausiliario di Polizia Giudiziaria ai sensi dell'art. 348, comma 4 c.p.p, dal personale in forza a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Ufficio o Comando di appartenenza"></span>` : ''}
+                    <br>per l'esecuzione degli accertamenti previsti dagli articoli 186 e/o 187 cds, consistenti in&nbsp;<span class="editable-field" contenteditable="true">${isSanitarioRichiesta ? tipoAccertamentoTesto : 'accertamento con etilometro'}</span>.
+                </p>
+                
+                <h4 class="font-bold text-center my-6">AVVISA</h4>
+                
+                <p class="text-justify">
+                    il/la Sig./Sig.ra&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Nome Cognome Conducente"></span>&nbsp;nato/a a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo"></span>&nbsp;il&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data"></span>,
+                    ai sensi del combinato disposto degli articoli 354, 356 c.p.p., e 114 disp. att. c.p.p., che:
+                </p>
+                <ul class="list-disc font-bold my-4 pl-10 text-justify">
+                    <li>ha facoltà di farsi assistere dal difensore di fiducia;</li>
+                    <li>in mancanza di nomina del difensore o in caso di ritardo nell'intervento dello stesso, si procede ugualmente all'attività di accertamento indicata.</li>
+                </ul>
+                
+                <p class="text-justify">Informato di quanto sopra, l'interessato ha dichiarato:</p>
+                <div class="my-4 pl-8">
+                    <div class="checkbox-grid">
+                        <div class="checkbox">${data.rispostaDifensore === 'presente' || data.rispostaDifensore === 'assente' ? 'X' : '&nbsp;'}</div>
+                        <div>di nominare l'Avv.&nbsp;<span class="editable-field" contenteditable="true">${sanitizedAvvocato}</span></div>
+                    </div>
+                    <div class="checkbox-grid">
+                        <div class="checkbox">${data.rispostaDifensore === 'rinuncia' || data.rispostaDifensore === 'nessuno' ? 'X' : '&nbsp;'}</div>
+                        <div>di non avvalersi della facoltà di nominare un difensore di fiducia.</div>
+                    </div>
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>L'interessato</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>${isSanitarioRichiesta ? "L'Ausiliario di Polizia Giudiziaria" : "L'Operatore di Polizia Giudiziaria"}</p>
+                    </div>
+                </div>
+            </div>
+         `;
+    }
+
+    container.innerHTML = modulesHtml;
+}
+
+</script>
+
+</body>
+</html>

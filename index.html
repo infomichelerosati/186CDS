@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulatore Verbale Art. 186 CdS (v6 - Prassi Operativa)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .card {
+            width: 100%;
+            max-width: 800px;
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .input-group, .radio-group { margin-bottom: 1.5rem; }
+        label { display: flex; align-items: center; font-weight: 600; color: #4b5563; margin-bottom: 0.5rem; }
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: #d1d5db;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+        .info-icon:hover { background-color: #3b82f6; }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            color: #1f2937;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        }
+        input:disabled, button:disabled { background-color: #e5e7eb; cursor: not-allowed; opacity: 0.5; }
+        .checkbox-group { display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; user-select: none; }
+        /* MODIFICA: Griglia dei sintomi resa responsiva */
+        .sintomi-grid { display: grid; grid-template-columns: 1fr; sm:grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+        .custom-checkbox { position: relative; display: inline-block; width: 1.25rem; height: 1.25rem; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 0.375rem; transition: background-color 0.2s, box-shadow 0.2s; flex-shrink: 0; margin-right: 0.75rem; }
+        .custom-checkbox::after { content: ''; position: absolute; display: none; left: 0.4rem; top: 0.15rem; width: 0.3rem; height: 0.6rem; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        input[type="checkbox"]:checked + .custom-checkbox { background-color: #3b82f6; border-color: #3b82f6; }
+        input[type="checkbox"]:checked + .custom-checkbox::after { display: block; }
+        input[type="checkbox"], input[type="radio"] { display: none; }
+        .radio-label { display: flex; align-items: center; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; }
+        input[type="radio"]:checked + .radio-label { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); }
+        .result-box { background-color: #f1f5f9; border-radius: 1rem; padding: 1.5rem; md:padding: 2rem; display: none; color: #1f2937; margin-top: 2rem; }
+        .result-box h3 { font-size: 1.25rem; md:font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937; line-height: 1.4; }
+        .result-section h4 { font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 0.25rem; }
+        .sanctions-list-item { display: flex; align-items: flex-start; gap: 1rem; }
+        .sanctions-list-item svg { flex-shrink: 0; margin-top: 0.25rem; }
+        .sanction-title { display: flex; align-items: center; }
+        .sanction-explanation { font-style: italic; color: #4b5563; font-size: 0.8rem; margin-left: 0.5rem; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(5px); justify-content: center; align-items: center; animation: modalFadeIn 0.3s; }
+        @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background-color: #ffffff; padding: 1.5rem; md:padding: 2rem; border-radius: 1rem; width: 90%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
+        .modal-body { max-height: 70vh; overflow-y: auto; white-space: pre-wrap; background-color: #f9fafb; border: 1px solid #d1d5db; padding: 1rem; border-radius: 0.5rem; font-family: 'Courier New', Courier, monospace; }
+        .info-modal-body { white-space: normal; font-family: 'Inter', sans-serif; }
+        .close-button { color: #aaa; position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+        .gestione-veicolo-item { margin-bottom: 0.75rem; display: flex; align-items: baseline; }
+        .gestione-veicolo-item strong { color: #1e40af; flex-shrink: 0; width: 100px; }
+        
+        #powered-by-box {
+            position: fixed; top: 10px; left: 10px; padding: 4px 8px;
+            background: linear-gradient(135deg, #ff00de, #de00ff, #4100ff, #00b3ff, #00ffc3, #a2ff00);
+            background-size: 400% 400%; border-radius: 5px; z-index: 2000;
+            font-size: 6px; font-weight: bold; color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            animation: gradient-animation 8s ease infinite, pulse-animation 2s infinite;
+            -webkit-user-select: none; user-select: none;
+        }
+        @keyframes gradient-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes pulse-animation { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center min-h-screen">
+
+    <div class="card p-6 md:p-10">
+        <form id="simulatoreForm">
+            <!-- MODIFICA: Titolo e paragrafo resi responsivi -->
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">Simulatore Verbale Art. 186 CdS</h1>
+            <p class="text-center text-gray-600 mb-8">Vademecum operativo (Aggiornamento 2025).</p>
+            
+            <div class="result-section border-b pb-4 mb-6">
+                <h4>Gestione Dati Accertamento</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 items-end">
+                    <div>
+                        <label for="fileName" class="text-sm font-normal">Nome File per Salvataggio</label>
+                        <input type="text" id="fileName" placeholder="Es. accertamento_rossi_240925">
+                    </div>
+                    <!-- MODIFICA: Pulsanti Salva/Carica resi responsivi con flex-col -->
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button type="button" id="saveDataButton" onclick="saveData()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl text-sm" disabled>Salva Dati</button>
+                        <button type="button" onclick="document.getElementById('fileLoader').click()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-xl text-sm">Carica Dati</button>
+                        <input type="file" id="fileLoader" class="hidden" accept=".json">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione Dati Preliminari -->
+            <div class="result-section">
+                <h4>Dati Preliminari</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div class="input-group">
+                        <label for="drivingCategory">Categoria Conducente<span class="info-icon" onclick="showInfoModal('art186bis')">i</span></label>
+                        <select id="drivingCategory">
+                            <option value="standard">Conducente Standard</option>
+                            <option value="neopatentato">Neopatentato / Conducente Professionale</option>
+                            <option value="under21">Minore di 21 anni</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="infractionTime">Orario Infrazione<span class="info-icon" onclick="showInfoModal('aggravanteNotturna')">i</span></label>
+                        <select id="infractionTime">
+                            <option value="day">Diurno (07:01 - 21:59)</option>
+                            <option value="night">Notturno (22:00 - 07:00)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="tipoVeicolo">Tipo Veicolo</label>
+                        <select id="tipoVeicolo">
+                            <option value="autoveicolo" selected>Autoveicolo</option>
+                            <option value="motociclo_ciclomotore">Motociclo / Ciclomotore</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="tipoPatente">Tipo Patente</label>
+                        <select id="tipoPatente">
+                            <option value="italiana" selected>Patente Italiana</option>
+                            <option value="ue">Patente UE / SEE</option>
+                            <option value="extra_ue">Patente Extra-UE</option>
+                        </select>
+                    </div>
+                     <!-- Sezione Lingua Straniero (inizialmente nascosta) -->
+                    <div id="lingua-straniero-section" class="hidden mt-4 p-4 border border-blue-300 bg-blue-50 rounded-lg md:col-span-2">
+                        <label class="font-bold text-blue-800">Gestione Lingua Conducente Straniero<span class="info-icon" onclick="showInfoModal('interprete')">i</span></label>
+                        <div class="radio-group mt-2">
+                            <label class="text-sm font-normal">Il conducente comprende e parla la lingua italiana?</label>
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <div><input type="radio" id="comprendeItalianoSi" name="comprendeItaliano" value="si" checked><label for="comprendeItalianoSi" class="radio-label text-sm">Sì</label></div>
+                                <div><input type="radio" id="comprendeItalianoNo" name="comprendeItaliano" value="no"><label for="comprendeItalianoNo" class="radio-label text-sm">No</label></div>
+                            </div>
+                        </div>
+                        <div id="interprete-alert" class="hidden mt-3 p-3 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm rounded-md">
+                            <p class="font-bold">ATTENZIONE: Obbligo di Interprete</p>
+                            <p>È obbligatorio reperire un interprete prima di notificare gli avvisi di legge (es. facoltà di farsi assistere da un difensore). La violazione di questa norma può causare la nullità dell'atto.</p>
+                        </div>
+                    </div>
+                </div>
+                <label class="checkbox-group"><input type="checkbox" id="haSinistro"><span class="custom-checkbox"></span><span>Ha causato un sinistro stradale</span><span class="info-icon" onclick="showInfoModal('aggravanteSinistro')">i</span></label>
+                <div id="sinistro-details" class="hidden pl-8">
+                    <label class="text-sm font-normal">Conseguenze del Sinistro</label>
+                     <div class="grid grid-cols-1 gap-2 mt-2">
+                        <div><input type="radio" id="sinistroDanni" name="conseguenzeSinistro" value="danni" checked><label for="sinistroDanni" class="radio-label text-sm">Solo danni a cose</label></div>
+                        <div><input type="radio" id="sinistroLesioni" name="conseguenzeSinistro" value="lesioni"><label for="sinistroLesioni" class="radio-label text-sm">Lesioni gravi/gravissime o decesso</label></div>
+                    </div>
+                </div>
+                <label class="checkbox-group mt-4"><input type="checkbox" id="proprietaTerzi"><span class="custom-checkbox"></span><span>Il veicolo è di proprietà di terzi</span><span class="info-icon" onclick="showInfoModal('proprietaTerzi')">i</span></label>
+                <label class="checkbox-group"><input type="checkbox" id="isRecidivo"><span class="custom-checkbox"></span><span>Recidivo nel biennio</span><span class="info-icon" onclick="showInfoModal('recidiva')">i</span></label>
+            </div>
+            
+            <!-- Sezione Osservazione e Test -->
+            <div class="result-section mt-6">
+                <h4>Osservazione e Accertamento</h4>
+                 <div class="input-group">
+                    <label>Stato Sintomatico e Fasi Preliminari</label>
+                    <div class="sintomi-grid">
+                        <label class="checkbox-group"><input type="checkbox" class="sintomo-check" value="Alito vinoso"><span class="custom-checkbox"></span><span>Alito vinoso</span></label>
+                        <label class="checkbox-group"><input type="checkbox" class="sintomo-check" value="Occhi lucidi/arrossati"><span class="custom-checkbox"></span><span>Occhi lucidi/arrossati</span></label>
+                        <label class="checkbox-group"><input type="checkbox" class="sintomo-check" value="Eloquio sconnesso"><span class="custom-checkbox"></span><span>Eloquio sconnesso</span></label>
+                        <label class="checkbox-group"><input type="checkbox" class="sintomo-check" value="Deambulazione incerta"><span class="custom-checkbox"></span><span>Deambulazione incerta</span></label>
+                    </div>
+                    <input type="text" id="sintomiAltro" placeholder="Altri sintomi osservati..." class="mb-4">
+                     <label class="checkbox-group"><input type="checkbox" id="usoPrecursore"><span class="custom-checkbox"></span><span>Eseguito Pre-Test con esito positivo</span><span class="info-icon" onclick="showInfoModal('precursore')">i</span></label>
+                </div>
+
+                <div class="radio-group">
+                    <label>Tipo di Accertamento Probatorio</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                        <div><input type="radio" id="tipoEtilometro" name="tipoAccertamento" value="etilometro" checked><label for="tipoEtilometro" class="radio-label">Etilometro</label></div>
+                        <div><input type="radio" id="tipoSanitario" name="tipoAccertamento" value="sanitario"><label for="tipoSanitario" class="radio-label">Sanitario</label></div>
+                    </div>
+                </div>
+                
+                 <div id="difensore-section" class="radio-group hidden">
+                    <label>Gestione Avviso al Difensore<span class="info-icon" onclick="showInfoModal('avvocato')">i</span></label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <div><input type="radio" id="difensoreRinuncia" name="rispostaDifensore" value="rinuncia" checked><label for="difensoreRinuncia" class="radio-label text-sm">Rinuncia alla facoltà</label></div>
+                        <div><input type="radio" id="difensoreAssente" name="rispostaDifensore" value="assente"><label for="difensoreAssente" class="radio-label text-sm">Richiede, non presente/disponibile</label></div>
+                        <div><input type="radio" id="difensorePresente" name="rispostaDifensore" value="presente"><label for="difensorePresente" class="radio-label text-sm">Richiede, presente durante l'atto</label></div>
+                        <div><input type="radio" id="difensoreNessuno" name="rispostaDifensore" value="nessuno"><label for="difensoreNessuno" class="radio-label text-sm">Non nomina difensore</label></div>
+                    </div>
+                    <div id="difensore-details" class="hidden mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="nomeAvvocato" class="text-sm font-normal">Nome Avvocato</label>
+                            <input type="text" id="nomeAvvocato" placeholder="Es. Mario Rossi">
+                        </div>
+                        <div>
+                            <label for="orarioAvviso" class="text-sm font-normal">Orario Avviso al conducente</label>
+                            <input type="time" id="orarioAvviso">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="accertamento-etilometro-fields">
+                    <div id="rifiuto-etilometro-section">
+                        <label class="checkbox-group"><input type="checkbox" id="rifiutoTest"><span class="custom-checkbox"></span><span>Il conducente rifiuta di sottoporsi all'accertamento</span><span class="info-icon" onclick="showInfoModal('rifiuto')">i</span></label>
+                        <div id="avviso-conseguenze-etilometro" class="hidden pl-8 mb-4">
+                            <label class="checkbox-group"><input type="checkbox" id="info-conseguenze-etilometro"><span class="custom-checkbox"></span><span class="text-sm">Informato delle conseguenze penali del rifiuto</span><span class="info-icon" onclick="showInfoModal('rifiutoAvvertimento')">i</span></label>
+                        </div>
+                    </div>
+                    <div id="measurements" class="mt-4">
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div><label for="firstMeasurement">1ª Misurazione (g/L)</label><input type="number" id="firstMeasurement" step="0.01" placeholder="Es. 0.95"></div>
+                            <div><label for="secondMeasurement">2ª Misurazione (g/L)</label><input type="number" id="secondMeasurement" step="0.01" placeholder="Es. 0.91"></div>
+                            <div><label for="firstMeasurementTime">Orario 1ª</label><input type="time" id="firstMeasurementTime"></div>
+                            <div><label for="secondMeasurementTime">Orario 2ª</label><input type="time" id="secondMeasurementTime"></div>
+                        </div>
+                    </div>
+                    <div class="result-section mt-6">
+                        <h4>Dettagli Etilometro</h4>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="etilometroTipo">Modello</label><input type="text" id="etilometroTipo" placeholder="Es. Dräger 7510"></div>
+                            <div><label for="matricolaNumero">N. Matricola</label><input type="text" id="matricolaNumero" placeholder="Es. ARBA-0001"></div>
+                            <div><label for="omologazioneNumero">N. Omologazione</label><input type="text" id="omologazioneNumero" placeholder="Es. OM00123-19"></div>
+                            <div><label for="taraturaData">Data Ultima Taratura</label><input type="date" id="taraturaData"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="accertamento-sanitario-fields" class="hidden">
+                     <div class="radio-group">
+                        <label>Contesto del Prelievo<span class="info-icon" onclick="showInfoModal('sanitario')">i</span></label>
+                        <div class="grid grid-cols-1 gap-4 mt-2">
+                            <div><input type="radio" id="sanitarioCura" name="contestoPrelievo" value="cura" checked><label for="sanitarioCura" class="radio-label text-sm">Eseguito per protocollo medico (fini di cura)</label></div>
+                            <div><input type="radio" id="sanitarioRichiesta" name="contestoPrelievo" value="richiesta"><label for="sanitarioRichiesta" class="radio-label text-sm">Eseguito su richiesta della Polizia Giudiziaria</label></div>
+                        </div>
+                    </div>
+                    <div id="richiesta-pg-options" class="hidden mt-4 p-3 border border-gray-200 rounded-lg space-y-3">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="consensoAcquisito">
+                            <span class="custom-checkbox"></span>
+                            <span class="text-sm">Acquisito consenso informato (o verbalizzato dissenso)</span>
+                            <span class="info-icon" onclick="showInfoModal('consenso')">i</span>
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="richiediTest187">
+                            <span class="custom-checkbox"></span>
+                            <span class="text-sm font-semibold text-indigo-700">Richiedi anche accertamento per Art. 187 (Stupefacenti)</span>
+                        </label>
+                    </div>
+                    <div id="sanitario-richiesta-refusal" class="hidden">
+                        <label class="checkbox-group"><input type="checkbox" id="rifiutoPrelievo"><span class="custom-checkbox"></span><span>Il conducente rifiuta il prelievo richiesto</span><span class="info-icon" onclick="showInfoModal('rifiuto')">i</span></label>
+                        <div id="avviso-conseguenze-sanitario" class="hidden pl-8 mb-4">
+                            <label class="checkbox-group"><input type="checkbox" id="info-conseguenze-sanitario"><span class="custom-checkbox"></span><span class="text-sm">Informato delle conseguenze penali del rifiuto</span><span class="info-icon" onclick="showInfoModal('rifiutoAvvertimento')">i</span></label>
+                        </div>
+                    </div>
+                     <div id="pm-contact-section" class="hidden mt-4 p-4 border border-red-300 bg-red-50 rounded-lg">
+                        <label class="font-bold text-red-700">Procedura Prelievo Coattivo (Solo Lesioni Gravi/Omicidio Stradale)</label>
+                        <div class="mt-2">
+                             <label class="checkbox-group"><input type="checkbox" id="pmContattato"><span class="custom-checkbox"></span><span>Contattato P.M. di turno</span></label>
+                        </div>
+                        <div id="pm-details" class="hidden mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="nomePm" class="text-sm">Nome P.M.</label><input type="text" id="nomePm" placeholder="Es. Dott. Bianchi"></div>
+                            <div><label for="orarioPm" class="text-sm">Orario Contatto</label><input type="time" id="orarioPm"></div>
+                            <div class="md:col-span-2">
+                                <label class="text-sm">Esito Richiesta</label>
+                                <div class="grid grid-cols-2 gap-2 mt-1">
+                                    <div><input type="radio" id="pmDisposto" name="esitoPm" value="disposto"><label for="pmDisposto" class="radio-label text-xs">Disposto Prelievo Coattivo</label></div>
+                                    <div><input type="radio" id="pmNonDisposto" name="esitoPm" value="non_disposto"><label for="pmNonDisposto" class="radio-label text-xs">NON Disposto Prelievo Coattivo</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mt-4">
+                        <label for="tassoSanitario">Tasso Alcolemico Rilevato (g/L)</label>
+                        <input type="number" id="tassoSanitario" step="0.01" placeholder="Es. 1.65">
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODIFICA: Pulsanti principali resi responsivi con flex-col -->
+            <div class="flex flex-col md:flex-row gap-4 mt-8">
+                <button type="button" onclick="calculate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-transform transform hover:scale-105">Genera Quadro Sanzionatorio</button>
+                <button type="reset" class="w-full md:w-1/3 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-xl transition-transform transform hover:scale-105">Nuova Simulazione</button>
+            </div>
+        </form>
+
+        <div id="results-container">
+            <div id="result-box" class="result-box">
+                <!-- content generated by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Fac-Simile Verbale -->
+    <div id="facSimileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeFacSimileModal()">&times;</span>
+            <h4 class="text-xl font-bold mb-4" id="facSimile-title">Fac-Simile Verbale</h4>
+            <div id="facSimile-body" class="modal-body"></div>
+            <button type="button" onclick="exportFacSimileToPDF()" class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl">Anteprima Stampa/Salva Verbale</button>
+        </div>
+    </div>
+    
+    <!-- Modal for Info Box -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeInfoModal()">&times;</span>
+            <h4 class="text-xl font-bold mb-4" id="info-title"></h4>
+            <div id="info-body" class="modal-body info-modal-body"></div>
+        </div>
+    </div>
+
+
+    <script>
+        let currentResultData = {};
+
+        const infoArticles = {
+            art186bis: {
+                title: 'Art. 186-bis CdS - Tolleranza Zero',
+                text: 'Per i neopatentati (primi 3 anni), i minori di 21 anni e i conducenti professionali vige il divieto assoluto di guidare dopo aver assunto alcolici. Qualsiasi tasso superiore a 0 g/L costituisce illecito. Se il tasso rientra nelle fasce dell\'art. 186 (>0.5 g/L), le sanzioni previste sono ulteriormente aumentate.'
+            },
+            aggravanteNotturna: {
+                title: 'Art. 186, c. 2-sexies - Aggravante Notturna',
+                text: 'Se il reato (quindi per tassi >0,8 g/L o in caso di rifiuto) è commesso tra le ore 22:00 e le 07:00, l\'importo dell\'ammenda è aumentato da un terzo alla metà. Questa aggravante non si applica all\'illecito amministrativo della prima fascia (0.5-0.8 g/L).'
+            },
+            aggravanteSinistro: {
+                title: 'Art. 186, c. 2-bis - Aggravante dell\'Incidente',
+                text: 'Se il conducente in stato di ebbrezza provoca un incidente stradale, tutte le sanzioni previste (sia amministrative che penali) sono raddoppiate ed è sempre disposto il fermo amministrativo del veicolo per 180 giorni, salvo che il veicolo appartenga a persona estranea al reato. Se il tasso è >1.5 g/L, la patente è sempre revocata.'
+            },
+            proprietaTerzi: {
+                title: 'Principio di Estraneità del Proprietario',
+                text: 'Il veicolo di proprietà di una persona estranea al reato non può essere sottoposto a confisca. In questo caso, la durata della sospensione della patente è raddoppiata. Anche il fermo amministrativo per sinistro non si applica se il proprietario è estraneo.'
+            },
+            recidiva: {
+                title: 'Art. 186, c. 2, lett. c) - Recidiva nel Biennio',
+                text: 'Se un soggetto commette un reato di guida in stato di ebbrezza (>0.8 g/L) entro due anni da una condanna definitiva per lo stesso reato, la patente di guida è sempre revocata. Per i soggetti già condannati per le ipotesi di reato, è inoltre previsto l\'obbligo di installare il dispositivo "Alcolock".'
+            },
+            precursore: {
+                title: 'Art. 186, c. 3 - Accertamento Preliminare (Pre-Test)',
+                text: 'Gli agenti possono utilizzare un dispositivo portatile (precursore) per un test qualitativo rapido. Il suo esito positivo non ha valore di prova legale, ma costituisce, insieme ai sintomi, il "ragionevole motivo" che giustifica la richiesta di sottoporsi all\'accertamento con etilometro. Per questo test non è necessario l\'avviso al difensore.'
+            },
+            rifiuto: {
+                title: 'Art. 186, c. 7 - Rifiuto dell\'Accertamento',
+                text: 'Il rifiuto di sottoporsi all\'accertamento con etilometro (o al prelievo ematico su richiesta della P.G.) non è una scappatoia, ma un\'autonoma fattispecie di reato. È punito con le stesse sanzioni previste per la fascia più grave (tasso >1.5 g/L), inclusa ammenda, arresto e sequestro del veicolo ai fini della confisca (o fermo di 180 giorni per i motocicli).'
+            },
+             rifiutoAvvertimento: {
+                title: 'Avvertimento Verbale da Riferire (Art. 186, c. 7)',
+                text: 'Prima di formalizzare il rifiuto, è obbligatorio informare il conducente con una frase simile a: "La informo che il suo rifiuto di sottoporsi all\'accertamento costituisce un reato, punito con le stesse sanzioni previste per la fascia più grave, che includono l\'arresto da 6 mesi a 1 anno, un\'ammenda da 1.500 a 6.000 euro, la sospensione della patente da 6 mesi a 2 anni e la confisca del veicolo."'
+            },
+            avvocato: {
+                title: 'Art. 114 disp. att. c.p.p. - Assistenza del Difensore',
+                text: 'L\'accertamento con etilometro (o prelievo su richiesta) è un "atto di polizia giudiziaria urgente". Pertanto, prima di procedere, l\'agente ha l\'obbligo di avvisare il conducente della facoltà di farsi assistere da un difensore di fiducia. La risposta del conducente deve essere verbalizzata. Le operazioni non vengono ritardate in attesa del legale.'
+            },
+            sanitario: {
+                title: 'Art. 186, c. 5 - Accertamento Sanitario',
+                text: 'Esistono due casi: 1) Prelievo per Fini di Cura: Se i medici lo eseguono per diagnosticare il paziente (es. dopo incidente), i risultati sono utilizzabili e non serve l\'avviso al difensore. 2) Prelievo su Richiesta P.G.: Se richiesto dagli agenti, diventa un atto di P.G. e richiede il consenso e il preventivo avviso al difensore. Il rifiuto in questo caso è reato.'
+            },
+            interprete: {
+                title: 'Art. 143 c.p.p. - Diritto all\'Interprete',
+                text: 'L\'imputato (e per estensione la persona sottoposta ad indagini) che non conosce la lingua italiana ha il diritto di farsi assistere gratuitamente da un interprete al fine di comprendere l\'accusa contro di lui formulata e di seguire il compimento degli atti cui partecipa. La mancata osservanza di questa disposizione può portare alla nullità degli atti.'
+            },
+            consenso: {
+                title: 'Acquisizione del Consenso Informato',
+                text: 'Come da direttiva ministeriale, prima di procedere a un prelievo su richiesta della PG, è obbligatorio informare il conducente sulle finalità dell\'atto e acquisire il suo consenso scritto (o verbalizzare il suo dissenso). Questo passaggio è fondamentale per la validità della procedura.'
+            }
+        };
+
+        // --- Setup Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('simulatoreForm');
+            const fileNameInput = document.getElementById('fileName');
+            const saveDataButton = document.getElementById('saveDataButton');
+            const fileLoaderInput = document.getElementById('fileLoader');
+            const tipoAccertamentoRadios = document.querySelectorAll('input[name="tipoAccertamento"]');
+            const rispostaDifensoreRadios = document.querySelectorAll('input[name="rispostaDifensore"]');
+            const contestoPrelievoRadios = document.querySelectorAll('input[name="contestoPrelievo"]');
+            const haSinistroCheckbox = document.getElementById('haSinistro');
+            const sinistroDetails = document.getElementById('sinistro-details');
+            
+            const rifiutoCheckbox = document.getElementById('rifiutoTest');
+            const measurementContainer = document.getElementById('measurements');
+            const difensoreSection = document.getElementById('difensore-section');
+            const difensoreDetails = document.getElementById('difensore-details');
+            const richiestaPgOptions = document.getElementById('richiesta-pg-options');
+            const sanitarioRichiestaRefusal = document.getElementById('sanitario-richiesta-refusal');
+            const rifiutoPrelievoCheckbox = document.getElementById('rifiutoPrelievo');
+            const tassoSanitarioInput = document.getElementById('tassoSanitario');
+            const avvisoConseguenzeEtilometro = document.getElementById('avviso-conseguenze-etilometro');
+            const avvisoConseguenzeSanitario = document.getElementById('avviso-conseguenze-sanitario');
+            const pmContactSection = document.getElementById('pm-contact-section');
+            const pmContattatoCheckbox = document.getElementById('pmContattato');
+            const pmDetails = document.getElementById('pm-details');
+
+            const tipoPatenteSelect = document.getElementById('tipoPatente');
+            const linguaStranieroSection = document.getElementById('lingua-straniero-section');
+            const comprendeItalianoRadios = document.querySelectorAll('input[name="comprendeItaliano"]');
+            const interpreteAlert = document.getElementById('interprete-alert');
+
+            const encodedText = 'UG93ZXJlZCBCeSBOaWNoZWxlIFJvc2F0aQ==';
+            const poweredBox = document.createElement('div');
+            poweredBox.id = 'powered-by-box';
+            try { poweredBox.textContent = atob(encodedText); } catch (e) { poweredBox.textContent = 'Powered By'; }
+            document.body.appendChild(poweredBox);
+
+            fileNameInput.addEventListener('input', () => {
+                saveDataButton.disabled = fileNameInput.value.trim() === '';
+            });
+
+            fileLoaderInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            loadData(data);
+                        } catch (error) {
+                            alert('Errore: Il file caricato non è un JSON valido.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+                event.target.value = '';
+            });
+
+
+            const toggleDifensoreVisibility = () => {
+                const tipo = document.querySelector('input[name="tipoAccertamento"]:checked').value;
+                const contesto = document.querySelector('input[name="contestoPrelievo"]:checked').value;
+                const show = (tipo === 'etilometro') || (tipo === 'sanitario' && contesto === 'richiesta');
+                difensoreSection.classList.toggle('hidden', !show);
+            };
+
+            const toggleAccertamentoFields = () => {
+                const selectedType = document.querySelector('input[name="tipoAccertamento"]:checked').value;
+                document.getElementById('accertamento-etilometro-fields').classList.toggle('hidden', selectedType !== 'etilometro');
+                document.getElementById('accertamento-sanitario-fields').classList.toggle('hidden', selectedType !== 'sanitario');
+                toggleDifensoreVisibility();
+                checkPmContactVisibility();
+            };
+            
+            const toggleDifensoreDetails = () => {
+                const radioValue = document.querySelector('input[name="rispostaDifensore"]:checked').value;
+                const showDetails = radioValue === 'assente' || radioValue === 'presente';
+                difensoreDetails.classList.toggle('hidden', !showDetails);
+                 if (!showDetails) document.getElementById('nomeAvvocato').value = '';
+            };
+            
+             const checkPmContactVisibility = () => {
+                const isSanitarioRichiesta = document.getElementById('tipoSanitario').checked && document.getElementById('sanitarioRichiesta').checked;
+                const isLesioni = document.getElementById('sinistroLesioni').checked;
+                const isRifiutoPrelievo = document.getElementById('rifiutoPrelievo').checked;
+                const show = isSanitarioRichiesta && isLesioni && isRifiutoPrelievo;
+                pmContactSection.classList.toggle('hidden', !show);
+            };
+
+
+            const handleContestoPrelievoChange = () => {
+                const contesto = document.querySelector('input[name="contestoPrelievo"]:checked').value;
+                const isRichiesta = contesto === 'richiesta';
+                sanitarioRichiestaRefusal.classList.toggle('hidden', !isRichiesta);
+                richiestaPgOptions.classList.toggle('hidden', !isRichiesta);
+
+                if (!isRichiesta) {
+                    rifiutoPrelievoCheckbox.checked = false;
+                    document.getElementById('richiediTest187').checked = false;
+                    tassoSanitarioInput.disabled = false;
+                }
+                toggleDifensoreVisibility();
+                checkPmContactVisibility();
+            };
+            
+            const updateTassoSanitarioState = () => {
+                const isRifiutoPrelievo = document.getElementById('rifiutoPrelievo').checked;
+                const pmHaDisposto = document.getElementById('pmDisposto').checked;
+                tassoSanitarioInput.disabled = isRifiutoPrelievo && !pmHaDisposto;
+                if (tassoSanitarioInput.disabled) {
+                    tassoSanitarioInput.value = '';
+                }
+            };
+            
+            tipoPatenteSelect.addEventListener('change', () => {
+                const isStraniero = tipoPatenteSelect.value !== 'italiana';
+                linguaStranieroSection.classList.toggle('hidden', !isStraniero);
+                if (!isStraniero) {
+                    document.getElementById('comprendeItalianoSi').checked = true;
+                    interpreteAlert.classList.add('hidden');
+                }
+            });
+
+            comprendeItalianoRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const necessitaInterprete = document.getElementById('comprendeItalianoNo').checked;
+                    interpreteAlert.classList.toggle('hidden', !necessitaInterprete);
+                });
+            });
+
+
+            tipoAccertamentoRadios.forEach(radio => radio.addEventListener('change', toggleAccertamentoFields));
+            rispostaDifensoreRadios.forEach(radio => radio.addEventListener('change', toggleDifensoreDetails));
+            contestoPrelievoRadios.forEach(radio => radio.addEventListener('change', handleContestoPrelievoChange));
+            
+            haSinistroCheckbox.addEventListener('change', () => {
+                sinistroDetails.classList.toggle('hidden', !haSinistroCheckbox.checked);
+                 if (!haSinistroCheckbox.checked) {
+                    document.getElementById('sinistroDanni').checked = true;
+                    checkPmContactVisibility();
+                 }
+            });
+            
+            document.querySelectorAll('input[name="conseguenzeSinistro"]').forEach(radio => radio.addEventListener('change', checkPmContactVisibility));
+
+            rifiutoCheckbox.addEventListener('change', () => {
+                const isChecked = rifiutoCheckbox.checked;
+                measurementContainer.querySelectorAll('input').forEach(input => {
+                    input.disabled = isChecked;
+                    if (isChecked) input.value = '';
+                });
+                avvisoConseguenzeEtilometro.classList.toggle('hidden', !isChecked);
+            });
+            
+            rifiutoPrelievoCheckbox.addEventListener('change', () => {
+                const isChecked = rifiutoPrelievoCheckbox.checked;
+                avvisoConseguenzeSanitario.classList.toggle('hidden', !isChecked);
+                checkPmContactVisibility();
+                updateTassoSanitarioState();
+            });
+            
+            document.querySelectorAll('input[name="esitoPm"]').forEach(radio => radio.addEventListener('change', updateTassoSanitarioState));
+            
+             pmContattatoCheckbox.addEventListener('change', () => {
+                pmDetails.classList.toggle('hidden', !pmContattatoCheckbox.checked);
+            });
+
+            form.addEventListener('reset', () => {
+                document.getElementById('result-box').style.display = 'none';
+                currentResultData = {};
+                setTimeout(() => {
+                    toggleAccertamentoFields();
+                    toggleDifensoreDetails();
+                    handleContestoPrelievoChange();
+                    sinistroDetails.classList.add('hidden');
+                    avvisoConseguenzeEtilometro.classList.add('hidden');
+                    avvisoConseguenzeSanitario.classList.add('hidden');
+                    pmContactSection.classList.add('hidden');
+                    pmDetails.classList.add('hidden');
+                    linguaStranieroSection.classList.add('hidden');
+                    interpreteAlert.classList.add('hidden');
+
+                }, 0);
+            });
+
+            toggleAccertamentoFields();
+            toggleDifensoreDetails();
+            handleContestoPrelievoChange();
+        });
+
+        function saveData() {
+            const form = document.getElementById('simulatoreForm');
+            const data = {};
+            const elements = form.elements;
+
+            for (let i = 0; i < elements.length; i++) {
+                const el = elements[i];
+                if (el.id) {
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        data[el.id] = el.checked;
+                    } else {
+                        data[el.id] = el.value;
+                    }
+                }
+            }
+            data.sintomiChecked = Array.from(document.querySelectorAll('.sintomo-check:checked')).map(cb => cb.value);
+
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const fileName = document.getElementById('fileName').value.trim() || 'accertamento_art186';
+            a.href = url;
+            a.download = `${fileName}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadData(data) {
+            const form = document.getElementById('simulatoreForm');
+            const elements = form.elements;
+
+            for (let id in data) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = data[id];
+                    } else {
+                        el.value = data[id];
+                    }
+                }
+            }
+            document.querySelectorAll('.sintomo-check').forEach(cb => cb.checked = false);
+            if(data.sintomiChecked) {
+                data.sintomiChecked.forEach(value => {
+                    const cb = document.querySelector(`.sintomo-check[value="${value}"]`);
+                    if(cb) cb.checked = true;
+                });
+            }
+            
+            document.querySelectorAll('input, select').forEach(el => {
+                const event = new Event('change', { bubbles: true });
+                el.dispatchEvent(event);
+            });
+            document.getElementById('fileName').dispatchEvent(new Event('input'));
+        }
+
+        function exportSummaryToPDF() {
+            const { jsPDF } = window.jspdf;
+            const resultBox = document.getElementById('result-box');
+            const buttonsToHide = resultBox.querySelectorAll('button');
+            buttonsToHide.forEach(btn => btn.style.visibility = 'hidden');
+
+            html2canvas(resultBox, { scale: 2 }).then(canvas => {
+                buttonsToHide.forEach(btn => btn.style.visibility = 'visible');
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = imgWidth / imgHeight;
+                const finalImgWidth = pdfWidth - 20;
+                const finalImgHeight = finalImgWidth / ratio;
+                pdf.addImage(imgData, 'PNG', 10, 10, finalImgWidth, finalImgHeight);
+                
+                const pdfBlob = pdf.output('blob');
+                const blobUrl = URL.createObjectURL(pdfBlob);
+                window.open(blobUrl, '_blank');
+            });
+        }
+
+        function exportFacSimileToPDF() {
+            const { jsPDF } = window.jspdf;
+            const modalBody = document.getElementById('facSimile-body');
+            const title = document.getElementById('facSimile-title').textContent;
+            const text = modalBody.textContent;
+            
+            const pdf = new jsPDF('p', 'pt', 'a4');
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text(title, 40, 60);
+
+            pdf.setFont("times", "normal");
+            pdf.setFontSize(11);
+            
+            const margins = { top: 80, bottom: 60, left: 40, width: 522 };
+            const lines = pdf.splitTextToSize(text, margins.width);
+            pdf.text(lines, margins.left, margins.top + 20);
+            
+            const pdfBlob = pdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            window.open(blobUrl, '_blank');
+        }
+
+        function showInfoModal(key) {
+            const article = infoArticles[key];
+            if (article) {
+                document.getElementById('info-title').textContent = article.title;
+                document.getElementById('info-body').textContent = article.text;
+                document.getElementById('infoModal').style.display = 'flex';
+            }
+        }
+        function closeInfoModal() {
+             document.getElementById('infoModal').style.display = 'none';
+        }
+        
+        function showFacSimileModal() {
+            const { isPenal, sintomi, usoPrecursore, tipoAccertamento, tipoPatente, comprendeItaliano, rifiutoTest, rifiutoPrelievo, infoConseguenzeEtilometro, infoConseguenzeSanitario, contestoPrelievo, etilometroTipo, matricolaNumero, omologazioneNumero, taraturaData, firstMeasurementTime, firstMeasurement, secondMeasurementTime, secondMeasurement, finalTasso, normaViolata, rispostaDifensore, nomeAvvocato, orarioAvviso, pmContattato, nomePm, orarioPm, esitoPm } = currentResultData;
+            const isRefusal = rifiutoTest || rifiutoPrelievo;
+            const isPatenteItaliana = tipoPatente === 'italiana';
+            
+            const modalTitle = document.getElementById('facSimile-title');
+            const modalBody = document.getElementById('facSimile-body');
+            let verbaleText = "";
+            const today = new Date();
+            const day = today.getDate();
+            const monthName = today.toLocaleString('it-IT', { month: 'long' });
+            const timeString = today.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+            modalTitle.textContent = isPenal ? "Fac-Simile: Verbale di Accertamenti Urgenti" : "Fac-Simile: Verbale di Contestazione";
+            verbaleText += `OGGETTO: VERBALE DI ${isPenal ? 'ACCERTAMENTI URGENTI SULLA PERSONA' : 'CONTESTAZIONE DI VIOLAZIONE AMMINISTRATIVA'}\n\n`;
+            verbaleText += `L'anno ${today.getFullYear()}, addì ${day} del mese di ${monthName}, alle ore ${timeString}, in [luogo], noi sottoscritti Agenti [...] diamo atto di quanto segue:\n\n`;
+            verbaleText += `Si è proceduto al controllo del conducente [generalità], il quale manifestava i seguenti sintomi: ${sintomi}.`;
+            if(usoPrecursore) verbaleText += ` Si è inoltre proceduto a test preliminare con precursore, che ha dato esito positivo.\n\n`;
+            else verbaleText += `\n\n`;
+            
+             if (!isPatenteItaliana) {
+                if (comprendeItaliano) {
+                    verbaleText += `Si dà atto che il conducente, titolare di patente di guida estera, dichiara di comprendere e parlare correntemente la lingua italiana.\n\n`;
+                } else {
+                    verbaleText += `Si dà atto che, non comprendendo il conducente la lingua italiana, si è proceduto alla nomina di un interprete, Sig. [NOME INTERPRETE], per la traduzione degli avvisi di legge e degli atti.\n\n`;
+                }
+            }
+            
+            const requiresDifensoreNotice = (tipoAccertamento === 'etilometro') || (tipoAccertamento === 'sanitario' && contestoPrelievo === 'richiesta');
+            if (requiresDifensoreNotice) {
+                let avvisoDifensoreText = "";
+                const nomeAvvocatoText = nomeAvvocato ? `l'Avv. ${nomeAvvocato}` : `l'Avv. [Nome Avvocato]`;
+                switch (rispostaDifensore) {
+                    case 'rinuncia': avvisoDifensoreText = `Il conducente, a riguardo, ha dichiarato di rinunciare a tale facoltà.`; break;
+                    case 'assente': avvisoDifensoreText = `Il conducente, a riguardo, ha dichiarato di volersi avvalere della facoltà, nominando ${nomeAvvocatoText}, il quale non è giunto in tempo utile.`; break;
+                    case 'presente': avvisoDifensoreText = `Le operazioni si sono svolte alla presenza del difensore ${nomeAvvocatoText}.`; break;
+                    case 'nessuno': avvisoDifensoreText = `Il conducente, a riguardo, ha dichiarato di riservarsi la nomina del difensore.`; break;
+                }
+                verbaleText += `AVVISO DELLE FACOLTÀ DI LEGGE:\n`;
+                verbaleText += `Alle ore ${orarioAvviso || '[ora avviso]'}, prima di procedere, il conducente è stato avvisato della facoltà di farsi assistere da un difensore (art. 114 disp. att. c.p.p.).\n${avvisoDifensoreText}\n\n`;
+            }
+            
+            verbaleText += `ESECUZIONE ACCERTAMENTO:\n`;
+            if(isRefusal) {
+                const infoConseguenze = infoConseguenzeEtilometro || infoConseguenzeSanitario;
+                if(infoConseguenze) verbaleText += `Il conducente, edotto delle conseguenze penali, ha opposto rifiuto a sottoporsi all'accertamento richiesto.\n`;
+                else verbaleText += `Il conducente ha opposto rifiuto a sottoporsi all'accertamento richiesto.\n`;
+
+                if(pmContattato) {
+                    verbaleText += `\nSi dà atto che alle ore ${orarioPm || '[ora]'} è stato contattato il P.M. di turno, Dott. ${nomePm || '[nome]'}, il quale ha ${esitoPm === 'disposto' ? 'disposto' : 'NON ha disposto'} il prelievo coattivo.\n`;
+                }
+
+            } else if (tipoAccertamento === 'etilometro') {
+                verbaleText += `Accertamento eseguito con etilometro mod. ${etilometroTipo || '[non spec.]'}, matr. ${matricolaNumero || '[non spec.]'}, omologazione n. ${omologazioneNumero || '[non spec.]'}, ultima taratura in data ${taraturaData || '[non spec.]'}.\n`;
+                verbaleText += `  - 1ª Prova (ore ${firstMeasurementTime || '--:--'}): ${firstMeasurement} g/L\n`;
+                verbaleText += `  - 2ª Prova (ore ${secondMeasurementTime || '--:--'}): ${secondMeasurement} g/L\n`;
+                verbaleText += `Valore considerato ai fini della contestazione: ${finalTasso} g/L.\n`;
+            } else {
+                 if (contestoPrelievo === 'cura') verbaleText += `Si acquisisce referto medico da prelievo ematico eseguito per fini di cura, che ha rilevato un tasso di ${finalTasso} g/L.\n`;
+                 else verbaleText += `Accertamento eseguito tramite analisi ematica su richiesta della P.G., che ha rilevato un tasso di ${finalTasso} g/L.\n`;
+            }
+
+            verbaleText += `\nLa condotta descritta integra la violazione della seguente norma: ${normaViolata}.\n`;
+            verbaleText += `Si procede pertanto al ritiro del documento di guida e all'applicazione delle sanzioni e misure come da separato atto.\n\nLetto, confermato e sottoscritto.\n`;
+            
+            modalBody.textContent = verbaleText;
+            document.getElementById('facSimileModal').style.display = 'flex';
+        }
+
+        function closeFacSimileModal() { document.getElementById('facSimileModal').style.display = 'none'; }
+
+        function calculate() {
+            // --- 1. Raccolta Dati ---
+            const formData = {
+                drivingCategory: document.getElementById('drivingCategory').value,
+                infractionTime: document.getElementById('infractionTime').value,
+                tipoVeicolo: document.getElementById('tipoVeicolo').value,
+                tipoPatente: document.getElementById('tipoPatente').value,
+                comprendeItaliano: document.getElementById('comprendeItalianoSi').checked,
+                haSinistro: document.getElementById('haSinistro').checked,
+                conseguenzeSinistro: document.querySelector('input[name="conseguenzeSinistro"]:checked').value,
+                proprietaTerzi: document.getElementById('proprietaTerzi').checked,
+                isRecidivo: document.getElementById('isRecidivo').checked,
+                usoPrecursore: document.getElementById('usoPrecursore').checked,
+                tipoAccertamento: document.querySelector('input[name="tipoAccertamento"]:checked').value,
+                contestoPrelievo: document.querySelector('input[name="contestoPrelievo"]:checked').value,
+                richiediTest187: document.getElementById('richiediTest187').checked,
+                rispostaDifensore: document.querySelector('input[name="rispostaDifensore"]:checked').value,
+                nomeAvvocato: document.getElementById('nomeAvvocato').value,
+                orarioAvviso: document.getElementById('orarioAvviso').value,
+                rifiutoTest: document.getElementById('rifiutoTest').checked,
+                infoConseguenzeEtilometro: document.getElementById('info-conseguenze-etilometro').checked,
+                rifiutoPrelievo: document.getElementById('rifiutoPrelievo').checked,
+                infoConseguenzeSanitario: document.getElementById('info-conseguenze-sanitario').checked,
+                pmContattato: document.getElementById('pmContattato').checked,
+                nomePm: document.getElementById('nomePm').value,
+                orarioPm: document.getElementById('orarioPm').value,
+                esitoPm: document.querySelector('input[name="esitoPm"]:checked') ? document.querySelector('input[name="esitoPm"]:checked').value : null,
+                firstMeasurement: parseFloat(document.getElementById('firstMeasurement').value),
+                secondMeasurement: parseFloat(document.getElementById('secondMeasurement').value),
+                firstMeasurementTime: document.getElementById('firstMeasurementTime').value,
+                secondMeasurementTime: document.getElementById('secondMeasurementTime').value,
+                etilometroTipo: document.getElementById('etilometroTipo').value,
+                matricolaNumero: document.getElementById('matricolaNumero').value,
+                omologazioneNumero: document.getElementById('omologazioneNumero').value,
+                taraturaData: document.getElementById('taraturaData').value,
+                tassoSanitario: parseFloat(document.getElementById('tassoSanitario').value)
+            };
+            const sintomiChecked = Array.from(document.querySelectorAll('.sintomo-check:checked')).map(cb => cb.value);
+            const sintomiAltro = document.getElementById('sintomiAltro').value.trim();
+            if (sintomiAltro) sintomiChecked.push(sintomiAltro);
+            formData.sintomi = sintomiChecked.length > 0 ? sintomiChecked.join(', ') : 'non specificato';
+
+            // --- 2. Preparazione UI ---
+            const resultBox = document.getElementById('result-box');
+            resultBox.innerHTML = ` 
+                <h3 id="result-title"></h3>
+                <div class="result-section"><h4>Riepilogo Procedurale</h4><p id="proceduralNarrative" class="whitespace-pre-wrap"></p></div>
+                <div class="result-section"><h4>Gestione Pratica del Veicolo</h4><div id="gestioneVeicoloContent"></div></div>
+                <div class="result-section mt-4"><h4>Quadro Sanzionatorio e Misure Applicate</h4><ul id="sanctionsList" class="space-y-4"></ul></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="result-section mt-4"><h4>Atti da Redigere</h4><ul id="actsList" class="space-y-2 list-disc list-inside"></ul></div>
+                    <div class="result-section mt-4"><h4>Adempimenti Successivi</h4><ul id="adempimentiList" class="space-y-2 list-disc list-inside"></ul></div>
+                </div>
+                <!-- MODIFICA: Pulsanti nel risultato resi responsivi con flex-col -->
+                <div class="mt-8 flex flex-col md:flex-row gap-4">
+                    <button type="button" onclick="showFacSimileModal()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl">Genera Fac-Simile Verbale</button>
+                    <button type="button" id="openModulisticaBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl">Genera Modulistica Ufficiale</button>
+                    <button type="button" onclick="exportSummaryToPDF()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl">Anteprima Stampa/Salva Riepilogo</button>
+                </div>
+            `;
+            
+            document.getElementById('openModulisticaBtn').addEventListener('click', () => {
+                sessionStorage.setItem('modulisticaData', JSON.stringify(currentResultData));
+                window.open('modulistica.html', '_blank');
+            });
+            
+            // --- 3. Validazione e Tasso ---
+            const isRefusal = (formData.tipoAccertamento === 'etilometro' && formData.rifiutoTest) || (formData.tipoAccertamento === 'sanitario' && formData.contestoPrelievo === 'richiesta' && formData.rifiutoPrelievo);
+            let finalTasso = null;
+            if (isRefusal && formData.pmContattato && formData.esitoPm === 'disposto' && !isNaN(formData.tassoSanitario)) {
+                finalTasso = formData.tassoSanitario; 
+            } else if (!isRefusal) {
+                if (formData.tipoAccertamento === 'etilometro') {
+                    if (isNaN(formData.firstMeasurement) || isNaN(formData.secondMeasurement)) {
+                        resultBox.innerHTML = '<h3>Errore: Dati Mancanti</h3><p>Inserire i valori di entrambe le misurazioni.</p>';
+                        resultBox.style.display = 'block'; return;
+                    }
+                    finalTasso = Math.min(formData.firstMeasurement, formData.secondMeasurement);
+                } else {
+                    if (isNaN(formData.tassoSanitario)) {
+                        resultBox.innerHTML = '<h3>Errore: Dati Mancanti</h3><p>Inserire il valore del tasso alcolemico rilevato.</p>';
+                        resultBox.style.display = 'block'; return;
+                    }
+                    finalTasso = formData.tassoSanitario;
+                }
+            }
+            formData.finalTasso = finalTasso;
+
+            // --- 4. Logica Sanzionatoria ---
+            let multaMin, multaMax, arrestoMin = null, arrestoMax = null, sospensioneMin = 0, sospensioneMax = 0, punti = 0, titleText = "", normaViolata = "", isPenal = false;
+            const isArt186bis = (formData.drivingCategory === 'neopatentato' || formData.drivingCategory === 'under21');
+            const trueIsRefusal = isRefusal && !(formData.pmContattato && formData.esitoPm === 'disposto' && finalTasso !== null);
+
+            if (trueIsRefusal) {
+                isPenal = true; titleText = "Reato: Rifiuto dell'Accertamento"; normaViolata = "Art. 186, c. 7, CdS";
+                multaMin = 1500; multaMax = 6000; arrestoMin = 6; arrestoMax = 12; // Mesi
+                sospensioneMin = 6; sospensioneMax = 24; // Mesi
+            } else if (finalTasso < 0.5) {
+                if (isArt186bis && finalTasso > 0) {
+                    isPenal = false; titleText = "Illecito Amministrativo: Tolleranza Zero"; normaViolata = "Art. 186-bis, c. 2, CdS";
+                    multaMin = 168; multaMax = 672;
+                } else {
+                    resultBox.innerHTML = `<h3>Nessuna Violazione Rilevata</h3><p>Il tasso alcolemico di ${finalTasso} g/L è al di sotto della soglia di legge.</p>`;
+                    resultBox.style.display = 'block'; return;
+                }
+            } else if (finalTasso < 0.8) {
+                isPenal = false; titleText = `Illecito Amministrativo (Fascia A)`; normaViolata = "Art. 186, c. 2, lett. a), CdS";
+                multaMin = 543; multaMax = 2170; sospensioneMin = 3; sospensioneMax = 6;
+            } else if (finalTasso < 1.5) {
+                isPenal = true; titleText = `Reato Contravvenzionale (Fascia B)`; normaViolata = "Art. 186, c. 2, lett. b), CdS";
+                multaMin = 800; multaMax = 3200; arrestoMin = 0; arrestoMax = 6;
+                sospensioneMin = 6; sospensioneMax = 12;
+            } else {
+                isPenal = true; titleText = `Reato Contravvenzionale (Fascia C)`; normaViolata = "Art. 186, c. 2, lett. c), CdS";
+                multaMin = 1500; multaMax = 6000; arrestoMin = 6; arrestoMax = 12;
+                sospensioneMin = 12; sospensioneMax = 24;
+            }
+            formData.isPenal = isPenal; formData.normaViolata = normaViolata;
+            
+            // --- 5. Aggravanti e Aumenti ---
+            let multaExplanation = [], patenteExplanation = [], arrestoExplanation = [];
+            const isReatoGrave = isPenal && (finalTasso >= 1.5 || trueIsRefusal);
+
+            if (isArt186bis && (finalTasso >= 0.5 || isRefusal)) {
+                 const aumento = isReatoGrave ? 0.5 : 1/3;
+                 multaMin = Math.round(multaMin * (1 + aumento)); multaMax = Math.round(multaMax * (1 + aumento));
+                 multaExplanation.push("aumentata per Art. 186-bis");
+            }
+            if (formData.infractionTime === 'night' && isPenal) {
+                multaMin = Math.round(multaMin * (1 + 1/3)); multaMax = Math.round(multaMax * 1.5);
+                multaExplanation.push("aumentata per orario notturno");
+            }
+            if (formData.haSinistro) {
+                multaMin *= 2; multaMax *= 2; multaExplanation.push("raddoppiata per sinistro");
+                if (isPenal && arrestoMax > 0) {
+                    arrestoMin *= 2; arrestoMax *= 2;
+                    arrestoExplanation.push("raddoppiata per sinistro");
+                }
+            }
+
+            if (isReatoGrave && formData.proprietaTerzi) {
+                sospensioneMin *= 2; sospensioneMax *= 2;
+                patenteExplanation.push("raddoppiata per veicolo di terzi");
+            }
+            
+            let isSospensionRevoked = false;
+            if (formData.isRecidivo && isPenal) { isSospensionRevoked = true; patenteExplanation.push("disposta per recidiva"); }
+            if (formData.haSinistro && isReatoGrave) { isSospensionRevoked = true; patenteExplanation.push("disposta per incidente grave"); }
+            
+            // --- 6. Punti ---
+            if (finalTasso > 0 || isRefusal) punti = 10;
+            if (formData.haSinistro && punti > 0) punti *= 2;
+
+            // --- 7. Testi e Atti ---
+            const isPatenteItaliana = formData.tipoPatente === 'italiana';
+            let proceduralNarrative = `A seguito di stato sintomatico (${formData.sintomi})`;
+            if (formData.usoPrecursore) proceduralNarrative += ` e di test con precursore positivo,`;
+            proceduralNarrative += ` si è proceduto ad accertamento.\n`;
+            
+            if (!isPatenteItaliana) {
+                if (formData.comprendeItaliano) {
+                    proceduralNarrative += `\nSi dà atto che il conducente, titolare di patente estera, dichiara di comprendere e parlare correntemente la lingua italiana.\n`;
+                } else {
+                    proceduralNarrative += `\n<strong class="text-red-600">NOTA: Poiché il conducente non comprende la lingua italiana, gli avvisi di legge sono stati forniti tramite interprete.</strong>\n`;
+                }
+            }
+
+            const requiresDifensoreNotice = (formData.tipoAccertamento === 'etilometro') || (formData.tipoAccertamento === 'sanitario' && formData.contestoPrelievo === 'richiesta');
+            if (requiresDifensoreNotice) {
+                let avvisoDifensoreText = "";
+                const orarioAvvisoText = formData.orarioAvviso ? `alle ore ${formData.orarioAvviso}` : '';
+                const nomeAvvocatoText = formData.nomeAvvocato ? `l'Avv. ${formData.nomeAvvocato}` : 'il proprio difensore';
+                switch (formData.rispostaDifensore) {
+                    case 'rinuncia': avvisoDifensoreText = `Il conducente ${orarioAvvisoText}, ha rinunciato alla facoltà di farsi assistere.`; break;
+                    case 'assente': avvisoDifensoreText = `Il conducente ${orarioAvvisoText}, ha richiesto l'assistenza de ${nomeAvvocatoText}, non giunto/reperibile in tempo utile.`; break;
+                    case 'presente': avvisoDifensoreText = `Le operazioni si sono svolte alla presenza de ${nomeAvvocatoText}, contattato dal conducente ${orarioAvvisoText}.`; break;
+                    case 'nessuno': avvisoDifensoreText = `Il conducente ${orarioAvvisoText}, edotto della facoltà, non ha nominato un difensore.`; break;
+                }
+                proceduralNarrative += `\nPrevio avviso di legge, ${avvisoDifensoreText}\n\n`;
+            }
+
+            if (isRefusal) {
+                const infoConseguenze = formData.infoConseguenzeEtilometro || formData.infoConseguenzeSanitario;
+                proceduralNarrative += infoConseguenze 
+                    ? "Il conducente, edotto delle conseguenze penali, ha rifiutato di sottoporsi all'accertamento richiesto.\n"
+                    : "Il conducente ha rifiutato di sottoporsi all'accertamento richiesto.\n";
+                
+                if (formData.pmContattato) {
+                    proceduralNarrative += `\nAlle ore ${formData.orarioPm || '[ora]'} è stato contattato il P.M. di turno, Dott. ${formData.nomePm || '[nome]'}, il quale ha ${formData.esitoPm === 'disposto' ? 'DISPOSTO' : 'NON HA DISPOSTO'} il prelievo coattivo.\n`;
+                    if(formData.esitoPm === 'disposto') proceduralNarrative += `Si è proceduto con prelievo coattivo, che ha dato esito ${finalTasso} g/L.`
+                }
+
+            } else if (formData.tipoAccertamento === 'etilometro') {
+                 let details = `mod. ${formData.etilometroTipo||'N/D'}, matr. ${formData.matricolaNumero||'N/D'}, omologazione ${formData.omologazioneNumero||'N/D'}, taratura ${formData.taraturaData||'N/D'}`;
+                proceduralNarrative += `L'accertamento con etilometro (${details}) ha dato i seguenti esiti:\n- 1ª Prova (${formData.firstMeasurementTime || '--:--'}): ${formData.firstMeasurement} g/L\n- 2ª Prova (${formData.secondMeasurementTime || '--:--'}): ${formData.secondMeasurement} g/L\n`;
+                const t1 = new Date(`1970-01-01T${formData.firstMeasurementTime}`);
+                const t2 = new Date(`1970-01-01T${formData.secondMeasurementTime}`);
+                if (formData.firstMeasurementTime && formData.secondMeasurementTime) {
+                    const diff = Math.abs(t2 - t1) / 60000;
+                    proceduralNarrative += `L'intervallo di ${diff} minuti tra le prove è ${diff >= 5 ? 'conforme' : 'NON conforme'} alla normativa.\n`;
+                }
+                proceduralNarrative += `> Valore considerato: ${finalTasso} g/L.\n`;
+            } else {
+                if (formData.contestoPrelievo === 'cura') proceduralNarrative += `Acquisito referto medico da prelievo per fini di cura, che ha rilevato un tasso di ${finalTasso} g/L.\n`;
+                else proceduralNarrative += `L'accertamento tramite analisi ematica richiesta ha rilevato un tasso di ${finalTasso} g/L.\n`;
+            }
+            if (formData.haSinistro) proceduralNarrative += "\nL'accertamento è avvenuto in conseguenza di un sinistro stradale. ";
+            
+            let actsToDrawUp = [isPatenteItaliana ? "Ritiro della Patente di Guida" : "Ritiro del Documento di Guida Estero"];
+            if(isPenal) { actsToDrawUp.push("Verbale di Accertamenti Urgenti", "Verbale di Identificazione e Elezione di Domicilio"); }
+            else { actsToDrawUp.push("Verbale di Contestazione Amministrativa"); }
+            
+            if (!isPatenteItaliana && !formData.comprendeItaliano) { actsToDrawUp.push("Verbale di Nomina Interprete"); }
+            if (formData.haSinistro) { actsToDrawUp.push("Rilievo di Sinistro Stradale"); }
+            if (formData.tipoAccertamento === 'sanitario' && formData.contestoPrelievo === 'richiesta') { actsToDrawUp.push("Verbale di Nomina ad Ausiliario di P.G. (personale sanitario)"); }
+            if (formData.pmContattato) { actsToDrawUp.push("Annotazione su contatto e disposizione P.M."); }
+            
+            let gestioneVeicoloHTML = "";
+            const isMotociclo = formData.tipoVeicolo === 'motociclo_ciclomotore';
+            let vehicleActionTaken = false;
+
+            if (isReatoGrave && !formData.proprietaTerzi) {
+                 if (isMotociclo) {
+                    gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>FERMO AMMINISTRATIVO (180 giorni)</div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Affidare a depositeria autorizzata. Compilare 'Verbale di Fermo Amministrativo'.</div></div>`;
+                    actsToDrawUp.push("Verbale di Fermo Amministrativo");
+                } else {
+                    gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>SEQUESTRO PREVENTIVO AI FINI DELLA CONFISCA<span class="info-icon" onclick="showInfoModal('rifiuto')">i</span></div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Affidare a depositeria autorizzata. Compilare 'Verbale di Sequestro Preventivo'.</div></div>`;
+                    actsToDrawUp.push("Verbale di Sequestro Preventivo ai fini della confisca");
+                }
+                vehicleActionTaken = true;
+            }
+            
+            if (!vehicleActionTaken && formData.haSinistro && !formData.proprietaTerzi) {
+                gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>FERMO AMMINISTRATIVO (180 giorni)<span class="info-icon" onclick="showInfoModal('aggravanteSinistro')">i</span></div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Affidare a depositeria autorizzata. Compilare 'Verbale di Fermo Amministrativo'.</div></div>`;
+                actsToDrawUp.push("Verbale di Fermo Amministrativo");
+                vehicleActionTaken = true;
+            }
+
+            if (!vehicleActionTaken) {
+                 let reason = (isReatoGrave && formData.proprietaTerzi) ? 'AFFIDAMENTO A PERSONA IDONEA<span class="info-icon" onclick="showInfoModal(\'proprietaTerzi\')">i</span>' : 'AFFIDAMENTO A PERSONA IDONEA';
+                 let procedure = (isReatoGrave && formData.proprietaTerzi) ? "Affidare al proprietario o a persona idonea. Compilare 'Verbale di Affidamento'." : "Affidare a passeggero sobrio/proprietario/reperibile o chiamare soccorso stradale. Compilare 'Verbale di Affidamento'.";
+                 gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>${reason}</div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>${procedure}</div></div>`;
+            }
+            
+            let adempimenti = [
+                isPatenteItaliana ? "Invio patente alla Prefettura (entro 10 giorni)." : "Invio patente alla Prefettura (entro 10 giorni) per emissione provvedimento di inibizione alla guida.",
+                "A carico del conducente: Visita C.M.L. (entro 60 gg)."
+            ];
+            if (isPenal) adempimenti.unshift("Trasmissione Notizia di Reato alla Procura (immediata).");
+            if(formData.tipoAccertamento === 'sanitario') {
+                adempimenti.push("Acquisire documentazione sanitaria completa.");
+                adempimenti.push("Garantire e documentare la catena di custodia dei campioni.");
+            }
+
+            // --- 8. Aggiornamento UI ---
+            resultBox.style.display = 'block';
+            document.getElementById('proceduralNarrative').innerHTML = proceduralNarrative;
+            document.getElementById('gestioneVeicoloContent').innerHTML = gestioneVeicoloHTML;
+            document.getElementById('result-title').innerHTML = `<span>${titleText}</span><br><span class="text-lg font-medium text-gray-600">${normaViolata}</span>`;
+            const sanctionsList = document.getElementById('sanctionsList');
+            sanctionsList.innerHTML = ''; 
+            const addSanction = (icon, title, text, explanation, infoKeys = []) => {
+                let infoIconsHTML = infoKeys.map(key => `<span class="info-icon" onclick="showInfoModal('${key}')">i</span>`).join('');
+                let titleHTML = `<div class="sanction-title"><strong class="text-gray-800">${title}</strong>${infoIconsHTML}</div>`;
+                let explanationHTML = explanation.length > 0 ? `<span class="sanction-explanation">(${explanation.join(', ')})</span>` : '';
+                sanctionsList.innerHTML += `<li class="sanctions-list-item">${icon}<div>${titleHTML}<p class="text-sm text-gray-600">${text}${explanationHTML}</p></div></li>`;
+            };
+            const icons = {
+                money: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
+                gavel: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600"><path d="m14 14-7.5 7.5"></path><path d="m18 10 -7.5 7.5"></path><path d="m6 6 7.5-7.5"></path><path d="m10 2 7.5 7.5"></path><path d="m7.5 16.5 7.5-7.5"></path><path d="M3 21l7.5-7.5"></path></svg>`,
+                card: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>`,
+                car: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C20.7 10.1 21 9.6 21 9v-2c0-1.1-.9-2-2-2h-3l-1.4-3.4c-.5-1-1.5-1.6-2.6-1.6H9.6c-1.1 0-2.1.6-2.6 1.6L5.6 7H3c-1.1 0-2 .9-2 2v2c0 .6.3 1.1.8 1.4C1.7 12.3 1 13.1 1 14v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle></svg>`
+            };
+            const formatYearsMonths = (months) => {
+                if (months < 12) return `${months} mes${months > 1 ? 'i' : 'e'}`;
+                const years = Math.floor(months / 12);
+                const remMonths = months % 12;
+                let result = `${years} ann${years > 1 ? 'i' : 'o'}`;
+                if (remMonths > 0) result += ` e ${remMonths} mes${remMonths > 1 ? 'i' : 'e'}`;
+                return result;
+            };
+
+            let multaInfoKeys = [];
+            if (multaExplanation.includes("aumentata per Art. 186-bis")) multaInfoKeys.push('art186bis');
+            if (multaExplanation.includes("aumentata per orario notturno")) multaInfoKeys.push('aggravanteNotturna');
+            if (multaExplanation.includes("raddoppiata per sinistro")) multaInfoKeys.push('aggravanteSinistro');
+
+            addSanction(icons.gavel, "Natura Illecito:", isPenal ? "Reato Contravvenzionale" : "Illecito Amministrativo", []);
+            addSanction(icons.money, `Sanzione Pecuniaria:`, `Da €${multaMin} a €${multaMax}.`, multaExplanation, multaInfoKeys);
+            
+            if (arrestoMax > 0) {
+                 let arrestoText = arrestoMin === 0 ? `fino a ${formatYearsMonths(arrestoMax)}` : `da ${formatYearsMonths(arrestoMin)} a ${formatYearsMonths(arrestoMax)}`;
+                addSanction(icons.gavel, "Pena Detentiva:", `Arresto ${arrestoText}.`, arrestoExplanation, []);
+            }
+            
+            let patenteInfoKeys = [];
+            if (patenteExplanation.includes("disposta per recidiva")) patenteInfoKeys.push('recidiva');
+            if (patenteExplanation.includes("disposta per incidente grave")) patenteInfoKeys.push('aggravanteSinistro');
+            
+            if (sospensioneMax > 0 || isSospensionRevoked) {
+                let patenteText = "";
+                 if (isSospensionRevoked) {
+                    patenteText = isPatenteItaliana ? `**Revoca della Patente**.` : `**Revoca della Patente** (con provvedimento di inibizione alla guida).`;
+                } else {
+                    let sospensioneText = `da ${formatYearsMonths(sospensioneMin)} a ${formatYearsMonths(sospensioneMax)}`;
+                    patenteText = isPatenteItaliana ? `Sospensione ${sospensioneText}.` : `Inibizione alla guida in Italia per ${sospensioneText}.`;
+                }
+                 addSanction(icons.card, isPatenteItaliana ? "Sanzione sulla Patente:" : "Sanzione sul Documento di Guida:", patenteText, patenteExplanation, patenteInfoKeys);
+            }
+            
+            if(punti > 0 && isPatenteItaliana) addSanction(icons.card, "Punti Patente:", `Decurtazione di ${punti} punti.`, formData.haSinistro ? ["raddoppiati per sinistro"] : [], formData.haSinistro ? ['aggravanteSinistro'] : []);
+            if (formData.isRecidivo && isPenal) addSanction(icons.car, "Obblighi Aggiuntivi:", `Installazione obbligatoria "Alcolock".`, [], ['recidiva']);
+
+            document.getElementById('actsList').innerHTML = [...new Set(actsToDrawUp)].map(act => `<li>${act}</li>`).join('');
+            document.getElementById('adempimentiList').innerHTML = adempimenti.map(ad => `<li>${ad}</li>`).join('');
+            currentResultData = formData;
+            resultBox.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
