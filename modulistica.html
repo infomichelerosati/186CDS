@@ -179,7 +179,7 @@ function renderModules(data, container) {
 
     const isSanitarioRichiesta = data.tipoAccertamento === 'sanitario' && data.contestoPrelievo === 'richiesta';
     const anchePer187 = data.richiediTest187;
-    const requiresDifensore = data.isPenal || isSanitarioRichiesta;
+    const requiresDifensore = (data.tipoAccertamento === 'etilometro') || isSanitarioRichiesta || data.isPenal;
 
     // --- GENERA MOD 4: RICHIESTA ACCERTAMENTI URGENTI ---
     if (isSanitarioRichiesta) {
@@ -340,6 +340,61 @@ function renderModules(data, container) {
                 </div>
             </div>
          `;
+    }
+
+    // --- GENERA MODULO SOSPENSIONE BREVE EX ART. 218-TER CDS (SE APPLICABILE) ---
+    if (data.sospensioneBreveGiorni > 0) {
+        modulesHtml += `
+            <div class="page-container">
+                <div class="header">ART. 218-TER CDS</div>
+                <h2>VERBALE DI RITIRO PATENTE E SOSPENSIONE BREVE IN RELAZIONE AL PUNTEGGIO<br>(Art. 218-ter, c. 1, lett. p e Art. 186-bis, c. 2, Codice della Strada - Legge n. 177/2024)</h2>
+                
+                <p class="text-justify">
+                    L'anno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Anno"></span>&nbsp;il giorno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Giorno e Mese"></span>&nbsp;alle ore&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Ora"></span>&nbsp;in&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo"></span>,
+                    noi sottoscritti appartenenti a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Comando / Ufficio"></span>,
+                    avendo accertato nei confronti del conducente Sig./Sig.ra&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cognome e Nome"></span>,
+                    nato/a a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo di nascita"></span>&nbsp;il&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data"></span>,
+                    titolare di patente di guida cat.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cat."></span>&nbsp;n.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Numero Patente"></span>,
+                    la violazione dell'<strong>art. 186-bis, comma 2, CdS</strong> (tasso alcolemico accertato pari a <strong>${(data.finalTasso || 0).toFixed(2)} g/L</strong>),
+                    come da Verbale di Contestazione n.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="N. Verbale"></span>&nbsp;del&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data"></span>;
+                </p>
+
+                <p class="text-justify mt-4">
+                    Verificato tramite consultazione dell'Anagrafe Nazionale degli Abilitati alla Guida che il predetto conducente, al momento dell'accertamento, risulta avere un punteggio sulla patente inferiore a 20 punti:
+                </p>
+                <div class="my-4 pl-8">
+                    <div class="checkbox-grid">
+                        <div class="checkbox">${data.fasciaPuntiPatente === '10_19' ? 'X' : '&nbsp;'}</div>
+                        <div>compreso tra 10 e 19 punti (sospensione breve di 7 giorni, ovvero 14 giorni in caso di incidente stradale);</div>
+                    </div>
+                    <div class="checkbox-grid">
+                        <div class="checkbox">${data.fasciaPuntiPatente === '1_9' ? 'X' : '&nbsp;'}</div>
+                        <div>compreso tra 1 e 9 punti (sospensione breve di 15 giorni, ovvero 30 giorni in caso di incidente stradale);</div>
+                    </div>
+                    <div class="checkbox-grid">
+                        <div class="checkbox">${data.haSinistro ? 'X' : '&nbsp;'}</div>
+                        <div>con raddoppio della durata ai sensi dell'art. 218-ter, comma 3, CdS avendo provocato un incidente stradale.</div>
+                    </div>
+                </div>
+
+                <h4 class="font-bold text-center my-4">DISPONGONO</h4>
+                <p class="text-justify">
+                    il <strong>RITIRO IMMEDIATO</strong> della patente di guida sopra indicata e la <strong>SOSPENSIONE BREVE DELLA PATENTE DI GUIDA PER GIORNI ${data.sospensioneBreveGiorni}</strong> decorrenti dalla data odierna.
+                    La patente ritirata viene conservata presso l'Ufficio/Comando in intestazione e sarà restituita all'interessato o a un suo delegato al termine del periodo di sospensione. Dell'avvenuto ritiro è data immediata comunicazione telematica all'Anagrafe Nazionale degli Abilitati alla Guida.
+                </p>
+
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Il Conducente Trasgressore</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>I Verbalizzanti</p>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     container.innerHTML = modulesHtml;

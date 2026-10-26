@@ -1,41 +1,38 @@
-const CACHE_NAME = 'simulatore-186-cache-v1';
+const CACHE_NAME = 'simulatore-186-cache-v3-2026';
 const urlsToCache = [
-  '/',
-  'index.html',
-  'modulistica.html',
-  'manifest.json',
-  'icon-192.svg',
-  'icon-512.svg',
+  './',
+  './index.html',
+  './modulistica.html',
+  './manifest.json',
+  './icon-192.svg',
+  './icon-512.svg',
   'https://cdn.tailwindcss.com'
 ];
 
-// Install a service worker
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// Cache and return requests
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
+        if (response && response.status === 200 && event.request.method === 'GET') {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
         }
-        return fetch(event.request);
-      }
-    )
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
 
-// Update a service worker
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -47,6 +44,6 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });

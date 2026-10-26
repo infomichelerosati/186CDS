@@ -109,15 +109,15 @@
 
     <div class="card p-6 md:p-10">
         <form id="simulatoreForm">
-            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">Simulatore Verbale Art. 186 CdS</h1>
-            <p class="text-center text-gray-600 mb-8">Vademecum operativo (Aggiornamento 2025).</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">Simulatore Verbale Art. 186 / 186-bis CdS</h1>
+            <p class="text-center text-sm text-blue-700 font-semibold mb-6">Prontuario Operativo di Polizia Stradale — Aggiornato alla Riforma CdS (L. 177/2024), Art. 218-ter e D.M. MIT 02/07/2025 (Alcolock / Codici 68-69)</p>
             
             <div class="result-section border-b pb-4 mb-6">
                 <h4>Gestione Dati Accertamento</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 items-end">
                     <div>
                         <label for="fileName" class="text-sm font-normal">Nome File per Salvataggio</label>
-                        <input type="text" id="fileName" placeholder="Es. accertamento_rossi_240925">
+                        <input type="text" id="fileName" placeholder="Es. accertamento_rossi_261026">
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <button type="button" id="saveDataButton" onclick="saveData()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl text-sm" disabled>Salva Dati</button>
@@ -129,15 +129,20 @@
 
             <!-- Sezione Dati Preliminari -->
             <div class="result-section">
-                <h4>Dati Preliminari</h4>
+                <h4>Dati Preliminari e Condizioni Soggettive</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div class="input-group">
                         <label for="drivingCategory">Categoria Conducente<span class="info-icon" onclick="showInfoModal('art186bis')">i</span></label>
                         <select id="drivingCategory">
-                            <option value="standard">Conducente Standard</option>
-                            <option value="neopatentato">Neopatentato / Conducente Professionale</option>
-                            <option value="under21">Minore di 21 anni</option>
+                            <option value="standard">Conducente Ordinario (Art. 186 CdS)</option>
+                            <option value="neopatentato">Neopatentato (primi 3 anni - Art. 186-bis, c. 1, lett. a)</option>
+                            <option value="under21">Minore di 21 anni (18–20 anni - Art. 186-bis, c. 1, lett. a)</option>
+                            <option value="under18">Minore di 18 anni (AM / A1 / B1 - Art. 186-bis, c. 1 e 2)</option>
+                            <option value="professionale">Conducente Professionale / CQC / Mezzi >3,5t / Bus (Art. 186-bis, c. 1, lett. b,c,d)</option>
                         </select>
+                        <div id="anche-neopatentato-box" class="hidden mt-2">
+                            <label class="checkbox-group text-sm font-normal"><input type="checkbox" id="ancheNeopatentato"><span class="custom-checkbox"></span><span>È anche Neopatentato (patente B conseguita da meno di 3 anni: raddoppio punti)</span></label>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label for="infractionTime">Orario Infrazione<span class="info-icon" onclick="showInfoModal('aggravanteNotturna')">i</span></label>
@@ -147,22 +152,29 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label for="tipoVeicolo">Tipo Veicolo</label>
+                        <label for="tipoVeicolo">Tipo Veicolo Condotto<span class="info-icon" onclick="showInfoModal('veicoloInfo')">i</span></label>
                         <select id="tipoVeicolo">
-                            <option value="autoveicolo" selected>Autoveicolo</option>
-                            <option value="motociclo_ciclomotore">Motociclo / Ciclomotore</option>
+                            <option value="autoveicolo" selected>Autoveicolo / Autovettura (Cat. M1, N1)</option>
+                            <option value="motociclo_ciclomotore">Motociclo / Ciclomotore (Art. 213, c. 2-sexies CdS)</option>
+                            <option value="veicolo_pesante_bus">Veicolo Pesante >3,5t / Autobus >8 posti / Complesso >3,5t</option>
+                            <option value="velocipede_monopattino">Velocipede (Bici / E-Bike) o Monopattino Elettrico</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label for="tipoPatente">Tipo Patente</label>
-                        <select id="tipoPatente">
+                        <label for="tipoPatente">Tipo Patente e Punteggio (Art. 218-ter)<span class="info-icon" onclick="showInfoModal('sospensioneBreve')">i</span></label>
+                        <select id="tipoPatente" class="mb-2">
                             <option value="italiana" selected>Patente Italiana</option>
                             <option value="ue">Patente UE / SEE</option>
                             <option value="extra_ue">Patente Extra-UE</option>
                         </select>
+                        <select id="fasciaPuntiPatente" title="Punteggio attuale per verifica Sospensione Breve ex Art. 218-ter">
+                            <option value="20_o_piu" selected>Punteggio attuale: 20 o più punti (No Sosp. Breve 218-ter)</option>
+                            <option value="10_19">Punteggio attuale: da 10 a 19 punti (Sosp. Breve 7 gg / 14 gg con sinistro)</option>
+                            <option value="1_9">Punteggio attuale: da 1 a 9 punti (Sosp. Breve 15 gg / 30 gg con sinistro)</option>
+                        </select>
                     </div>
                      <!-- Sezione Lingua Straniero (inizialmente nascosta) -->
-                    <div id="lingua-straniero-section" class="hidden mt-4 p-4 border border-blue-300 bg-blue-50 rounded-lg md:col-span-2">
+                    <div id="lingua-straniero-section" class="hidden mt-2 p-4 border border-blue-300 bg-blue-50 rounded-lg md:col-span-2">
                         <label class="font-bold text-blue-800">Gestione Lingua Conducente Straniero<span class="info-icon" onclick="showInfoModal('interprete')">i</span></label>
                         <div class="radio-group mt-2">
                             <label class="text-sm font-normal">Il conducente comprende e parla la lingua italiana?</label>
@@ -172,21 +184,44 @@
                             </div>
                         </div>
                         <div id="interprete-alert" class="hidden mt-3 p-3 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm rounded-md">
-                            <p class="font-bold">ATTENZIONE: Obbligo di Interprete</p>
-                            <p>È obbligatorio reperire un interprete prima di notificare gli avvisi di legge (es. facoltà di farsi assistere da un difensore). La violazione di questa norma può causare la nullità dell'atto.</p>
+                            <p class="font-bold">ATTENZIONE: Obbligo di Interprete (Art. 143 c.p.p.)</p>
+                            <p>È obbligatorio reperire un interprete prima di notificare gli avvisi di legge (es. facoltà di farsi assistere da un difensore ex art. 114 disp. att. c.p.p.). La violazione causa nullità dell'atto.</p>
                         </div>
                     </div>
                 </div>
-                <label class="checkbox-group"><input type="checkbox" id="haSinistro"><span class="custom-checkbox"></span><span>Ha causato un sinistro stradale</span><span class="info-icon" onclick="showInfoModal('aggravanteSinistro')">i</span></label>
-                <div id="sinistro-details" class="hidden pl-8">
-                    <label class="text-sm font-normal">Conseguenze del Sinistro</label>
-                     <div class="grid grid-cols-1 gap-2 mt-2">
-                        <div><input type="radio" id="sinistroDanni" name="conseguenzeSinistro" value="danni" checked><label for="sinistroDanni" class="radio-label text-sm">Solo danni a cose</label></div>
-                        <div><input type="radio" id="sinistroLesioni" name="conseguenzeSinistro" value="lesioni"><label for="sinistroLesioni" class="radio-label text-sm">Lesioni gravi/gravissime o decesso</label></div>
+
+                <!-- Sezione Codici Unionali 68 e 69 (Alcolock) -->
+                <div class="mt-2 p-4 border border-indigo-200 bg-indigo-50 rounded-xl mb-4">
+                    <label class="checkbox-group mb-0"><input type="checkbox" id="hasCodici6869"><span class="custom-checkbox"></span><span class="text-indigo-900 font-bold">Patente GIÀ gravata dai Codici Unionali 68 ("Niente alcool") e/o 69 ("Alcolock")</span><span class="info-icon" onclick="showInfoModal('alcolockInfo')">i</span></label>
+                    <div id="alcolock-details" class="hidden mt-4 pl-2 border-t border-indigo-200 pt-3 space-y-3">
+                        <p class="text-xs text-indigo-800 font-medium">Controllo su strada ex Art. 125, c. 3-ter/3-quater, Art. 186, c. 9-quater CdS e D.M. MIT 02/07/2025:</p>
+                        <div>
+                            <label for="statoAlcolock" class="text-sm">Stato Dispositivo Alcolock e Sigillo Autodistruttivo</label>
+                            <select id="statoAlcolock" class="bg-white">
+                                <option value="regolare" selected>Installato, funzionante e con sigillo autodistruttivo integro</option>
+                                <option value="mancante_manomesso">Veicolo sprovvisto di Alcolock / Dispositivo alterato, manomesso, non funzionante o sigilli rimossi</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="docAlcolock" class="text-sm">Documentazione Obbligatoria a Bordo in Originale (D.M. MIT 02/07/2025)</label>
+                            <select id="docAlcolock" class="bg-white">
+                                <option value="regolare" selected>Dichiarazione di installazione + Certificato di taratura valido esibiti in originale</option>
+                                <option value="irregolare">Dichiarazione di installazione assente o Certificato di taratura scaduto / non esibito</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <label class="checkbox-group mt-4"><input type="checkbox" id="proprietaTerzi"><span class="custom-checkbox"></span><span>Il veicolo è di proprietà di terzi</span><span class="info-icon" onclick="showInfoModal('proprietaTerzi')">i</span></label>
-                <label class="checkbox-group"><input type="checkbox" id="isRecidivo"><span class="custom-checkbox"></span><span>Recidivo nel biennio</span><span class="info-icon" onclick="showInfoModal('recidiva')">i</span></label>
+
+                <label class="checkbox-group"><input type="checkbox" id="haSinistro"><span class="custom-checkbox"></span><span>Ha causato un sinistro stradale (Art. 186, c. 2-bis CdS)</span><span class="info-icon" onclick="showInfoModal('aggravanteSinistro')">i</span></label>
+                <div id="sinistro-details" class="hidden pl-8 mb-2">
+                    <label class="text-sm font-normal">Conseguenze del Sinistro</label>
+                     <div class="grid grid-cols-1 gap-2 mt-2">
+                        <div><input type="radio" id="sinistroDanni" name="conseguenzeSinistro" value="danni" checked><label for="sinistroDanni" class="radio-label text-sm">Solo danni a cose o lesioni lievi</label></div>
+                        <div><input type="radio" id="sinistroLesioni" name="conseguenzeSinistro" value="lesioni"><label for="sinistroLesioni" class="radio-label text-sm">Lesioni personali stradali gravi/gravissime o omicidio stradale (Artt. 589-bis / 590-bis c.p.)</label></div>
+                    </div>
+                </div>
+                <label class="checkbox-group mt-3"><input type="checkbox" id="proprietaTerzi"><span class="custom-checkbox"></span><span>Il veicolo appartiene interamente a persona estranea all'illecito/reato</span><span class="info-icon" onclick="showInfoModal('proprietaTerzi')">i</span></label>
+                <label class="checkbox-group"><input type="checkbox" id="isRecidivo"><span class="custom-checkbox"></span><span>Recidiva specifica nel biennio (o nel triennio per conducenti Art. 186-bis)</span><span class="info-icon" onclick="showInfoModal('recidiva')">i</span></label>
             </div>
             
             <!-- Sezione Osservazione e Test -->
@@ -347,52 +382,64 @@
 
         const infoArticles = {
             art186bis: {
-                title: 'Art. 186-bis CdS - Tolleranza Zero',
-                text: 'Per i neopatentati (primi 3 anni), i minori di 21 anni e i conducenti professionali vige il divieto assoluto di guidare dopo aver assunto alcolici. Qualsiasi tasso superiore a 0 g/L costituisce illecito. Se il tasso rientra nelle fasce dell\'art. 186 (>0.5 g/L), le sanzioni previste sono ulteriormente aumentate.'
+                title: 'Art. 186-bis CdS - Tolleranza Zero (0,00 g/L)',
+                text: 'Per i minori di 21 anni, i neopatentati (primi 3 anni dal conseguimento della patente di cat. B) e i conducenti professionali (trasporto persone/cose, veicoli >3,5t, autobus, taxi/NCC) vige il divieto assoluto di guidare dopo aver assunto bevande alcoliche.\n• Tasso > 0,00 e ≤ 0,50 g/L (c. 2): sanzione da € 168 a € 672, decurtazione 5 punti (10 se neopatentato) e Sospensione Breve immediata su strada ex art. 218-ter se il conducente ha meno di 20 punti.\n• Tasso > 0,50 e ≤ 0,80 g/L (c. 3): sanzioni di cui all\'art. 186 c. 2 lett. a) aumentate di 1/3.\n• Tasso > 0,80 g/L (c. 3): sanzioni di cui all\'art. 186 c. 2 lett. b) e c) aumentate da 1/3 alla metà.\n• Per i conducenti di veicoli pesanti/autobus (lett. b, c, d) in fascia > 1,50 g/L la revoca della patente è sempre disposta anche alla prima violazione (c. 5). Per gli altri conducenti 186-bis la revoca scatta in caso di recidiva nel triennio.'
             },
             aggravanteNotturna: {
-                title: 'Art. 186, c. 2-sexies - Aggravante Notturna',
-                text: 'Se il reato (quindi per tassi >0,8 g/L o in caso di rifiuto) è commesso tra le ore 22:00 e le 07:00, l\'importo dell\'ammenda è aumentato da un terzo alla metà. Questa aggravante non si applica all\'illecito amministrativo della prima fascia (0.5-0.8 g/L).'
+                title: 'Art. 186, c. 2-sexies CdS - Aggravante Orario Notturno',
+                text: 'L\'ammenda prevista per i reati di cui all\'art. 186 c. 2 lett. b), c) e c. 7 (rifiuto) commessi dopo le ore 22:00 e prima delle ore 07:00 è aumentata da un terzo alla metà. Non si applica agli illeciti amministrativi (Fascia A ≤ 0,80 g/L e Art. 186-bis c. 2).'
             },
             aggravanteSinistro: {
-                title: 'Art. 186, c. 2-bis - Aggravante dell\'Incidente',
-                text: 'Se il conducente in stato di ebbrezza provoca un incidente stradale, tutte le sanzioni previste (sia amministrative che penali) sono raddoppiate ed è sempre disposto il fermo amministrativo del veicolo per 180 giorni, salvo che il veicolo appartenga a persona estranea al reato. Se il tasso è >1.5 g/L, la patente è sempre revocata.'
+                title: 'Art. 186, c. 2-bis CdS - Conducente che provoca un Incidente',
+                text: 'Se il conducente in stato di ebbrezza provoca un incidente stradale (anche autonomo / fuoriuscita di sede stradale), le sanzioni di cui al comma 2 dell\'art. 186 e al comma 2 dell\'art. 186-bis sono RADDOPPIATE ed è disposto il fermo amministrativo del veicolo per 180 giorni, salvo che il veicolo appartenga a persona estranea all\'illecito. Qualora il tasso accertato sia > 1,50 g/L, la patente di guida è SEMPRE revocata.'
             },
             proprietaTerzi: {
-                title: 'Principio di Estraneità del Proprietario',
-                text: 'Il veicolo di proprietà di una persona estranea al reato non può essere sottoposto a confisca. In questo caso, la durata della sospensione della patente è raddoppiata. Anche il fermo amministrativo per sinistro non si applica se il proprietario è estraneo.'
+                title: 'Veicolo appartenente a Persona Estranea al Reato',
+                text: 'Se il veicolo appartiene interamente a persona estranea al reato (non comproprietaria e non concedente in leasing/noleggio a lungo termine con disponibilità esclusiva), non si applicano la confisca (e il conseguente sequestro amministrativo) né il fermo amministrativo di 180 giorni per sinistro. In compenso, per la Fascia C (> 1,50 g/L) e per il Rifiuto (c. 7), la durata della sospensione della patente è RADDOPPIATA.'
             },
             recidiva: {
-                title: 'Art. 186, c. 2, lett. c) - Recidiva nel Biennio',
-                text: 'Se un soggetto commette un reato di guida in stato di ebbrezza (>0.8 g/L) entro due anni da una condanna definitiva per lo stesso reato, la patente di guida è sempre revocata. Per i soggetti già condannati per le ipotesi di reato, è inoltre previsto l\'obbligo di installare il dispositivo "Alcolock".'
+                title: 'Recidiva Specifica (Biennio / Triennio) e Revoca Patente',
+                text: 'La patente è sempre REVOCATA in caso di recidiva nel biennio per i reati di Fascia C (> 1,50 g/L) e Rifiuto (c. 7), ovvero nel triennio per i conducenti di cui all\'art. 186-bis (c. 3 e c. 6).'
+            },
+            alcolockInfo: {
+                title: 'Riforma CdS (L. 177/2024) e D.M. MIT 02/07/2025: Codici 68, 69 e Alcolock',
+                text: '1) OBBLIGO FUTURO (Art. 186, c. 9-ter): La condanna per i reati di Fascia B (> 0,80 e ≤ 1,50 g/L) e Fascia C (> 1,50 g/L) comporta sempre l\'apposizione sulla patente dei codici unionali 68 ("Niente alcool") e 69 ("Limitata alla guida di veicoli dotati di dispositivo alcolock EN 50436") per almeno 2 anni (Fascia B) o almeno 3 anni (Fascia C).\n2) CONTROLLO SU STRADA (D.M. 02/07/2025): Il conducente con codici 68/69 deve avere a bordo il dispositivo con sigillo autodistruttivo integro ed esibire in originale la Dichiarazione di installazione (officina autorizzata L. 122/1992) e il Certificato di taratura in corso di validità (non serve aggiornamento DUV ex art. 78).\n3) SANZIONI PER CHI HA GIÀ I CODICI 68/69:\n• Fuori dai casi dell\'art. 186 (es. tasso 0,01–0,50 g/L o mancanza documenti/condizioni): Art. 125, c. 3-quater, 1° per. (€ 158–€ 638 + sospensione patente 1–6 mesi).\n• Guida senza Alcolock o con dispositivo/sigilli manomessi (a tasso 0): Art. 125, c. 3-quater, 2° per. (sanzioni raddoppiate: € 316–€ 1.276 + sospensione 2–12 mesi).\n• Nuova violazione Art. 186 (> 0,50 g/L): le sanzioni dell\'art. 186 sono aumentate di 1/3 (Art. 186, c. 9-quater, 1° per.), ovvero RADDOPPIATE se l\'Alcolock o i sigilli risultano alterati/manomessi/rimossi (Art. 186, c. 9-quater, 2° per.), ferme restando in concorso le sanzioni dell\'art. 125, c. 3-quater.'
+            },
+            sospensioneBreve: {
+                title: 'Art. 218-ter CdS (L. 177/2024) - Sospensione Breve su Strada',
+                text: 'Per la violazione dell\'Art. 186-bis, comma 2 (tasso > 0,00 e ≤ 0,50 g/L), l\'art. 218-ter, c. 1, lett. p) prevede la SOSPENSIONE BREVE immediata della patente applicata direttamente dall\'agente accertatore se il conducente ha meno di 20 punti:\n• Da 10 a 19 punti: sospensione di 7 giorni (14 giorni se ha provocato un incidente).\n• Da 1 a 9 punti: sospensione di 15 giorni (30 giorni se ha provocato un incidente).\nLa patente è ritirata immediatamente e conservata presso l\'Ufficio/Comando.'
+            },
+            veicoloInfo: {
+                title: 'Regime del Veicolo: Motocicli/Ciclomotori, Mezzi Pesanti e Velocipedi',
+                text: '• Motocicli e Ciclomotori (Art. 213, c. 2-sexies CdS): Quando adoperati per commettere un reato (quindi già dalla Fascia B > 0,80 g/L, oltre a Fascia C e Rifiuto), è SEMPRE disposta la confisca con immediato Sequestro Amministrativo ex artt. 213 c. 2-sexies e 224-ter CdS e affidamento obbligatorio al custode-acquirente per 30 giorni.\n• Velocipedi / Monopattini: Si applicano le sanzioni pecuniarie/penali dell\'art. 186, ma NON si applicano il ritiro/sospensione della patente né la decurtazione di punti (Cass. Pen. costante).'
             },
             precursore: {
                 title: 'Art. 186, c. 3 - Accertamento Preliminare (Pre-Test)',
-                text: 'Gli agenti possono utilizzare un dispositivo portatile (precursore) per un test qualitativo rapido. Il suo esito positivo non ha valore di prova legale, ma costituisce, insieme ai sintomi, il "ragionevole motivo" che giustifica la richiesta di sottoporsi all\'accertamento con etilometro. Per questo test non è necessario l\'avviso al difensore.'
+                text: 'Gli agenti possono utilizzare apparecchi portatili (precursori) per accertamenti qualitativi non invasivi. L\'esito positivo non costituisce prova legale dell\'ebbrezza ma legittima l\'accertamento tecnico con etilometro. Per il pre-test non è richiesto l\'avviso della facoltà di farsi assistere da un difensore.'
             },
             rifiuto: {
                 title: 'Art. 186, c. 7 - Rifiuto dell\'Accertamento',
-                text: 'Il rifiuto di sottoporsi all\'accertamento con etilometro (o al prelievo ematico su richiesta della P.G.) non è una scappatoia, ma un\'autonoma fattispecie di reato. È punito con le stesse sanzioni previste per la fascia più grave (tasso >1.5 g/L), inclusa ammenda, arresto e sequestro del veicolo ai fini della confisca (o fermo di 180 giorni per i motocicli).'
+                text: 'Salvo che il fatto costituisca più grave reato, in caso di rifiuto dell\'accertamento (precursore c. 3, etilometro c. 4 o sanitario c. 5) il conducente è punito con le pene di cui al comma 2, lett. c) (ammenda da € 1.500 a € 6.000 e arresto da 6 mesi a 1 anno), sospensione della patente da 6 mesi a 2 anni e confisca del veicolo (con immediato sequestro amministrativo ex art. 224-ter CdS, salvo che il veicolo appartenga a persona estranea, nel qual caso la sospensione patente è raddoppiata).'
             },
-             rifiutoAvvertimento: {
+            rifiutoAvvertimento: {
                 title: 'Avvertimento Verbale da Riferire (Art. 186, c. 7)',
-                text: 'Prima di formalizzare il rifiuto, è obbligatorio informare il conducente con una frase simile a: "La informo che il suo rifiuto di sottoporsi all\'accertamento costituisce un reato, punito con le stesse sanzioni previste per la fascia più grave, che includono l\'arresto da 6 mesi a 1 anno, un\'ammenda da 1.500 a 6.000 euro, la sospensione della patente da 6 mesi a 2 anni e la confisca del veicolo."'
+                text: 'Prima di formalizzare il rifiuto, informare il conducente: "La informo che il rifiuto di sottoporsi agli accertamenti alcolimetrici costituisce reato ai sensi dell\'art. 186, comma 7, CdS, punito con l\'arresto da 6 mesi a 1 anno, l\'ammenda da € 1.500 a € 6.000, la sospensione della patente da 6 mesi a 2 anni e la confisca amministrativa del veicolo."'
             },
             avvocato: {
-                title: 'Art. 114 disp. att. c.p.p. - Assistenza del Difensore',
-                text: 'L\'accertamento con etilometro (o prelievo su richiesta) è un "atto di polizia giudiziaria urgente". Pertanto, prima di procedere, l\'agente ha l\'obbligo di avvisare il conducente della facoltà di farsi assistere da un difensore di fiducia. La risposta del conducente deve essere verbalizzata. Le operazioni non vengono ritardate in attesa del legale.'
+                title: 'Art. 114 disp. att. c.p.p. e Art. 354 c.p.p. - Avviso al Difensore',
+                text: 'L\'accertamento strumentale con etilometro o il prelievo ematico richiesto dalla P.G. costituisce atto urgente e indifferibile ex art. 354 c.p.p. Prima di procedere è obbligatorio avvisare l\'interessato della facoltà di farsi assistere da un difensore di fiducia (senza obbligo di attendere l\'arrivo del difensore ove ciò pregiudichi la tempestività dell\'atto).'
             },
             sanitario: {
-                title: 'Art. 186, c. 5 - Accertamento Sanitario',
-                text: 'Esistono due casi: 1) Prelievo per Fini di Cura: Se i medici lo eseguono per diagnosticare il paziente (es. dopo incidente), i risultati sono utilizzabili e non serve l\'avviso al difensore. 2) Prelievo su Richiesta P.G.: Se richiesto dagli agenti, diventa un atto di P.G. e richiede il consenso e il preventivo avviso al difensore. Il rifiuto in questo caso è reato.'
+                title: 'Art. 186, c. 5 - Accertamento presso Strutture Sanitarie',
+                text: '1) Prelievo nell\'ambito di protocollo medico di pronto soccorso (fini di cura): utilizzabile a fini probatori senza previo avviso ex art. 114 disp. att. c.p.p. (Cass. Pen. costante).\n2) Prelievo richiesto espressamente dalla P.G. a fini di accertamento giudiziario: richiede il preventivo avviso della facoltà di farsi assistere dal difensore e l\'acquisizione del consenso (il rifiuto integra il reato di cui all\'art. 186, c. 7).'
             },
             interprete: {
-                title: 'Art. 143 c.p.p. - Diritto all\'Interprete',
-                text: 'L\'imputato (e per estensione la persona sottoposta ad indagini) che non conosce la lingua italiana ha il diritto di farsi assistere gratuitamente da un interprete al fine di comprendere l\'accusa contro di lui formulata e di seguire il compimento degli atti cui partecipa. La mancata osservanza di questa disposizione può portare alla nullità degli atti.'
+                title: 'Art. 143 c.p.p. - Assistenza dell\'Interprete',
+                text: 'Se il conducente straniero non comprende o non parla la lingua italiana, gli avvisi di legge (incluso l\'avviso ex art. 114 disp. att. c.p.p.) devono essere resi con l\'ausilio di un interprete nominato ausiliario di P.G. o mediante moduli tradotti nella lingua conosciuta.'
             },
             consenso: {
                 title: 'Acquisizione del Consenso Informato',
-                text: 'Come da direttiva ministeriale, prima di procedere a un prelievo su richiesta della PG, è obbligatorio informare il conducente sulle finalità dell\'atto e acquisire il suo consenso scritto (o verbalizzare il suo dissenso). Questo passaggio è fondamentale per la validità della procedura.'
+                text: 'Per il prelievo ematico su richiesta della P.G., è necessario acquisire il consenso scritto dell\'interessato (o verbalizzare il dissenso ai fini della contestazione dell\'art. 186, c. 7, salvo i casi di prelievo coattivo disposto dal P.M. ex art. 359-bis c.p.p. per i delitti di cui agli artt. 589-bis e 590-bis c.p.).'
             }
         };
 
@@ -407,6 +454,10 @@
             const contestoPrelievoRadios = document.querySelectorAll('input[name="contestoPrelievo"]');
             const haSinistroCheckbox = document.getElementById('haSinistro');
             const sinistroDetails = document.getElementById('sinistro-details');
+            const drivingCategorySelect = document.getElementById('drivingCategory');
+            const ancheNeopatentatoBox = document.getElementById('anche-neopatentato-box');
+            const hasCodici6869Checkbox = document.getElementById('hasCodici6869');
+            const alcolockDetails = document.getElementById('alcolock-details');
             
             const rifiutoCheckbox = document.getElementById('rifiutoTest');
             const measurementContainer = document.getElementById('measurements');
@@ -454,6 +505,16 @@
                 event.target.value = '';
             });
 
+            drivingCategorySelect.addEventListener('change', () => {
+                const val = drivingCategorySelect.value;
+                const showAncheNeo = (val === 'under21' || val === 'professionale');
+                ancheNeopatentatoBox.classList.toggle('hidden', !showAncheNeo);
+                if (!showAncheNeo) document.getElementById('ancheNeopatentato').checked = false;
+            });
+
+            hasCodici6869Checkbox.addEventListener('change', () => {
+                alcolockDetails.classList.toggle('hidden', !hasCodici6869Checkbox.checked);
+            });
 
             const toggleDifensoreVisibility = () => {
                 const tipo = document.querySelector('input[name="tipoAccertamento"]:checked').value;
@@ -577,7 +638,8 @@
                     pmDetails.classList.add('hidden');
                     linguaStranieroSection.classList.add('hidden');
                     interpreteAlert.classList.add('hidden');
-
+                    ancheNeopatentatoBox.classList.add('hidden');
+                    alcolockDetails.classList.add('hidden');
                 }, 0);
             });
 
@@ -706,7 +768,7 @@
         }
         
         function showFacSimileModal() {
-            const { isPenal, sintomi, usoPrecursore, tipoAccertamento, tipoPatente, comprendeItaliano, rifiutoTest, rifiutoPrelievo, infoConseguenzeEtilometro, infoConseguenzeSanitario, contestoPrelievo, etilometroTipo, matricolaNumero, omologazioneNumero, taraturaData, firstMeasurementTime, firstMeasurement, secondMeasurementTime, secondMeasurement, finalTasso, normaViolata, rispostaDifensore, nomeAvvocato, orarioAvviso, pmContattato, nomePm, orarioPm, esitoPm } = currentResultData;
+            const { isPenal, sintomi, usoPrecursore, tipoAccertamento, tipoPatente, comprendeItaliano, rifiutoTest, rifiutoPrelievo, infoConseguenzeEtilometro, infoConseguenzeSanitario, contestoPrelievo, etilometroTipo, matricolaNumero, omologazioneNumero, taraturaData, firstMeasurementTime, firstMeasurement, secondMeasurementTime, secondMeasurement, finalTasso, normaViolata, rispostaDifensore, nomeAvvocato, orarioAvviso, pmContattato, nomePm, orarioPm, esitoPm, hasCodici6869, statoAlcolock, docAlcolock, sospensioneBreveGiorni, pmrSummaryText } = currentResultData;
             const isRefusal = rifiutoTest || rifiutoPrelievo;
             const isPatenteItaliana = tipoPatente === 'italiana';
             
@@ -718,18 +780,25 @@
             const monthName = today.toLocaleString('it-IT', { month: 'long' });
             const timeString = today.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
-            modalTitle.textContent = isPenal ? "Fac-Simile: Verbale di Accertamenti Urgenti" : "Fac-Simile: Verbale di Contestazione";
-            verbaleText += `OGGETTO: VERBALE DI ${isPenal ? 'ACCERTAMENTI URGENTI SULLA PERSONA' : 'CONTESTAZIONE DI VIOLAZIONE AMMINISTRATIVA'}\n\n`;
-            verbaleText += `L'anno ${today.getFullYear()}, addì ${day} del mese di ${monthName}, alle ore ${timeString}, in [luogo], noi sottoscritti Agenti [...] diamo atto di quanto segue:\n\n`;
-            verbaleText += `Si è proceduto al controllo del conducente [generalità], il quale manifestava i seguenti sintomi: ${sintomi}.`;
-            if(usoPrecursore) verbaleText += ` Si è inoltre proceduto a test preliminare con precursore, che ha dato esito positivo.\n\n`;
+            modalTitle.textContent = isPenal ? "Fac-Simile: Verbale di Accertamenti Urgenti (Art. 354 c.p.p.)" : "Fac-Simile: Verbale di Contestazione Amministrativa";
+            verbaleText += `OGGETTO: VERBALE DI ${isPenal ? 'ACCERTAMENTI URGENTI SULLA PERSONA (ART. 354 C.P.P.)' : 'CONTESTAZIONE DI VIOLAZIONE AMMINISTRATIVA'}\n\n`;
+            verbaleText += `L'anno ${today.getFullYear()}, addì ${day} del mese di ${monthName}, alle ore ${timeString}, in [luogo del controllo], noi sottoscritti Ufficiali/Agenti di P.G. e Polizia Stradale [...] diamo atto di quanto segue:\n\n`;
+            verbaleText += `Si è proceduto al controllo del conducente [generalità complete], alla guida del veicolo [marca, modello, targa], il quale manifestava i seguenti sintomi riferibili ad assunzione alcolica: ${sintomi}.`;
+            if(usoPrecursore) verbaleText += ` Si è inoltre proceduto ad accertamento preliminare qualitativo mediante precursore (art. 186, c. 3, CdS), che ha dato esito positivo.\n\n`;
             else verbaleText += `\n\n`;
             
-             if (!isPatenteItaliana) {
+            if (hasCodici6869) {
+                verbaleText += `VERIFICA PRESCRIZIONI CODICI UNIONALI 68 E 69 (ALCOLOCK - D.M. MIT 02/07/2025):\n`;
+                verbaleText += `Il conducente risulta titolare di patente gravata dai codici unionali 68 ("Niente alcool") e/o 69 ("Obbligo Alcolock EN 50436"). All'atto del controllo:\n`;
+                verbaleText += `- Dispositivo Alcolock e sigillo autodistruttivo: ${statoAlcolock === 'regolare' ? 'REGOLARE E INTEGRO' : 'ASSENTE / MANOMESSO / NON FUNZIONANTE / SIGILLO RIMOSSO'}.\n`;
+                verbaleText += `- Documentazione a bordo in originale (Dichiarazione di installazione e Certificato di taratura valido): ${docAlcolock === 'regolare' ? 'REGOLARMENTE ESIBITA' : 'MANCANTE / SCADUTA'}.\n\n`;
+            }
+
+            if (!isPatenteItaliana) {
                 if (comprendeItaliano) {
                     verbaleText += `Si dà atto che il conducente, titolare di patente di guida estera, dichiara di comprendere e parlare correntemente la lingua italiana.\n\n`;
                 } else {
-                    verbaleText += `Si dà atto che, non comprendendo il conducente la lingua italiana, si è proceduto alla nomina di un interprete, Sig. [NOME INTERPRETE], per la traduzione degli avvisi di legge e degli atti.\n\n`;
+                    verbaleText += `Si dà atto che, non comprendendo il conducente la lingua italiana, si è proceduto alla nomina di un interprete ex art. 143 c.p.p., Sig. [NOME INTERPRETE], per la traduzione degli avvisi di legge e degli atti.\n\n`;
                 }
             }
             
@@ -738,37 +807,44 @@
                 let avvisoDifensoreText = "";
                 const nomeAvvocatoText = nomeAvvocato ? `l'Avv. ${nomeAvvocato}` : `l'Avv. [Nome Avvocato]`;
                 switch (rispostaDifensore) {
-                    case 'rinuncia': avvisoDifensoreText = `Il conducente, a riguardo, ha dichiarato di rinunciare a tale facoltà.`; break;
-                    case 'assente': avvisoDifensoreText = `Il conducente, a riguardo, ha dichiarato di volersi avvalere della facoltà, nominando ${nomeAvvocatoText}, il quale non è giunto in tempo utile.`; break;
-                    case 'presente': avvisoDifensoreText = `Le operazioni si sono svolte alla presenza del difensore ${nomeAvvocatoText}.`; break;
-                    case 'nessuno': avvisoDifensoreText = `Il conducente, a riguardo, ha dichiarato di riservarsi la nomina del difensore.`; break;
+                    case 'rinuncia': avvisoDifensoreText = `Il conducente ha dichiarato di NON volersi avvalere dell'assistenza di un difensore.`; break;
+                    case 'assente': avvisoDifensoreText = `Il conducente ha dichiarato di volersi far assistere da ${nomeAvvocatoText}, il quale avvisato non è giunto sul posto in tempo utile per il compimento dell'atto urgente.`; break;
+                    case 'presente': avvisoDifensoreText = `Le operazioni si sono svolte alla presenza del difensore di fiducia ${nomeAvvocatoText}.`; break;
+                    case 'nessuno': avvisoDifensoreText = `Il conducente, edotto della facoltà, non ha indicato alcun difensore.`; break;
                 }
-                verbaleText += `AVVISO DELLE FACOLTÀ DI LEGGE:\n`;
-                verbaleText += `Alle ore ${orarioAvviso || '[ora avviso]'}, prima di procedere, il conducente è stato avvisato della facoltà di farsi assistere da un difensore (art. 114 disp. att. c.p.p.).\n${avvisoDifensoreText}\n\n`;
+                verbaleText += `AVVISO DELLE FACOLTÀ DI LEGGE (ART. 114 DISP. ATT. C.P.P.):\n`;
+                verbaleText += `Alle ore ${orarioAvviso || '[ora avviso]'}, prima di procedere all'accertamento, il conducente è stato formalmente avvisato della facoltà di farsi assistere da un difensore di fiducia (artt. 354, 356 c.p.p. e 114 disp. att. c.p.p.).\n${avvisoDifensoreText}\n\n`;
             }
             
             verbaleText += `ESECUZIONE ACCERTAMENTO:\n`;
             if(isRefusal) {
                 const infoConseguenze = infoConseguenzeEtilometro || infoConseguenzeSanitario;
-                if(infoConseguenze) verbaleText += `Il conducente, edotto delle conseguenze penali, ha opposto rifiuto a sottoporsi all'accertamento richiesto.\n`;
+                if(infoConseguenze) verbaleText += `Il conducente, preventivamente edotto delle conseguenze penali e amministrative previste dall'art. 186, comma 7, CdS, ha opposto rifiuto a sottoporsi all'accertamento richiesto.\n`;
                 else verbaleText += `Il conducente ha opposto rifiuto a sottoporsi all'accertamento richiesto.\n`;
 
                 if(pmContattato) {
-                    verbaleText += `\nSi dà atto che alle ore ${orarioPm || '[ora]'} è stato contattato il P.M. di turno, Dott. ${nomePm || '[nome]'}, il quale ha ${esitoPm === 'disposto' ? 'disposto' : 'NON ha disposto'} il prelievo coattivo.\n`;
+                    verbaleText += `\nSi dà atto che alle ore ${orarioPm || '[ora]'} è stato contattato il P.M. di turno presso la Procura della Repubblica, Dott. ${nomePm || '[nome]'}, il quale ha ${esitoPm === 'disposto' ? 'DISPOSTO' : 'NON ha disposto'} l'accompagnamento coattivo / prelievo coattivo ex art. 359-bis c.p.p.\n`;
                 }
 
             } else if (tipoAccertamento === 'etilometro') {
-                verbaleText += `Accertamento eseguito con etilometro mod. ${etilometroTipo || '[non spec.]'}, matr. ${matricolaNumero || '[non spec.]'}, omologazione n. ${omologazioneNumero || '[non spec.]'}, ultima taratura in data ${taraturaData || '[non spec.]'}.\n`;
-                verbaleText += `  - 1ª Prova (ore ${firstMeasurementTime || '--:--'}): ${firstMeasurement} g/L\n`;
-                verbaleText += `  - 2ª Prova (ore ${secondMeasurementTime || '--:--'}): ${secondMeasurement} g/L\n`;
-                verbaleText += `Valore considerato ai fini della contestazione: ${finalTasso} g/L.\n`;
+                verbaleText += `Accertamento tecnico eseguito mediante etilometro omologato mod. ${etilometroTipo || '[non spec.]'}, matr. ${matricolaNumero || '[non spec.]'}, omologazione n. ${omologazioneNumero || '[non spec.]'}, con verifica periodica (taratura) in corso di validità eseguita in data ${taraturaData || '[non spec.]'}:\n`;
+                verbaleText += `  - 1ª Prova spirometrica (ore ${firstMeasurementTime || '--:--'}): ${(firstMeasurement || 0).toFixed(2)} g/L\n`;
+                verbaleText += `  - 2ª Prova spirometrica (ore ${secondMeasurementTime || '--:--'}): ${(secondMeasurement || 0).toFixed(2)} g/L\n`;
+                verbaleText += `Valore considerato ai fini della contestazione (più favorevole al conducente): ${(finalTasso || 0).toFixed(2)} g/L.\n`;
             } else {
-                 if (contestoPrelievo === 'cura') verbaleText += `Si acquisisce referto medico da prelievo ematico eseguito per fini di cura, che ha rilevato un tasso di ${finalTasso} g/L.\n`;
-                 else verbaleText += `Accertamento eseguito tramite analisi ematica su richiesta della P.G., che ha rilevato un tasso di ${finalTasso} g/L.\n`;
+                 if (contestoPrelievo === 'cura') verbaleText += `Si acquisisce certificazione medica della struttura sanitaria relativa a prelievo ematico eseguito nell'ambito di protocollo medico di pronto soccorso (fini di cura), da cui risulta un tasso alcolemico pari a ${(finalTasso || 0).toFixed(2)} g/L.\n`;
+                 else verbaleText += `Accertamento eseguito presso struttura sanitaria tramite prelievo ematico su richiesta della P.G. ex art. 186, c. 5, CdS, da cui risulta un tasso alcolemico pari a ${(finalTasso || 0).toFixed(2)} g/L.\n`;
             }
 
-            verbaleText += `\nLa condotta descritta integra la violazione della seguente norma: ${normaViolata}.\n`;
-            verbaleText += `Si procede pertanto al ritiro del documento di guida e all'applicazione delle sanzioni e misure come da separato atto.\n\nLetto, confermato e sottoscritto.\n`;
+            verbaleText += `\nQUALIFICAZIONE GIURIDICA E MISURE APPLICATE:\n`;
+            verbaleText += `La condotta descritta integra la violazione di: ${normaViolata}.\n`;
+            if (!isPenal && pmrSummaryText) {
+                verbaleText += `Modalità di estinzione (Art. 202 CdS): ${pmrSummaryText}\n`;
+            }
+            if (sospensioneBreveGiorni > 0) {
+                verbaleText += `Avendo il conducente un punteggio sulla patente inferiore a 20 punti, si applica immediatamente su strada la SOSPENSIONE BREVE DELLA PATENTE per giorni ${sospensioneBreveGiorni} ai sensi dell'art. 218-ter, c. 1, lett. p), CdS.\n`;
+            }
+            verbaleText += `Si procede agli adempimenti conseguenti sul documento di guida e sul veicolo come da separati verbali.\n\nLetto, confermato e sottoscritto.\n`;
             
             modalBody.textContent = verbaleText;
             document.getElementById('facSimileModal').style.display = 'flex';
@@ -776,13 +852,22 @@
 
         function closeFacSimileModal() { document.getElementById('facSimileModal').style.display = 'none'; }
 
+        function formatCurrency(val) {
+            return Number.isInteger(val) ? `€ ${val.toLocaleString('it-IT')}` : `€ ${val.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
         function calculate() {
             // --- 1. Raccolta Dati ---
             const formData = {
                 drivingCategory: document.getElementById('drivingCategory').value,
+                ancheNeopatentato: document.getElementById('ancheNeopatentato').checked,
                 infractionTime: document.getElementById('infractionTime').value,
                 tipoVeicolo: document.getElementById('tipoVeicolo').value,
                 tipoPatente: document.getElementById('tipoPatente').value,
+                fasciaPuntiPatente: document.getElementById('fasciaPuntiPatente').value,
+                hasCodici6869: document.getElementById('hasCodici6869').checked,
+                statoAlcolock: document.getElementById('statoAlcolock').value,
+                docAlcolock: document.getElementById('docAlcolock').value,
                 comprendeItaliano: document.getElementById('comprendeItalianoSi').checked,
                 haSinistro: document.getElementById('haSinistro').checked,
                 conseguenzeSinistro: document.querySelector('input[name="conseguenzeSinistro"]:checked').value,
@@ -791,6 +876,7 @@
                 usoPrecursore: document.getElementById('usoPrecursore').checked,
                 tipoAccertamento: document.querySelector('input[name="tipoAccertamento"]:checked').value,
                 contestoPrelievo: document.querySelector('input[name="contestoPrelievo"]:checked').value,
+                consensoAcquisito: document.getElementById('consensoAcquisito').checked,
                 richiediTest187: document.getElementById('richiediTest187').checked,
                 rispostaDifensore: document.querySelector('input[name="rispostaDifensore"]:checked').value,
                 nomeAvvocato: document.getElementById('nomeAvvocato').value,
@@ -816,18 +902,18 @@
             const sintomiChecked = Array.from(document.querySelectorAll('.sintomo-check:checked')).map(cb => cb.value);
             const sintomiAltro = document.getElementById('sintomiAltro').value.trim();
             if (sintomiAltro) sintomiChecked.push(sintomiAltro);
-            formData.sintomi = sintomiChecked.length > 0 ? sintomiChecked.join(', ') : 'non specificato';
+            formData.sintomi = sintomiChecked.length > 0 ? sintomiChecked.join(', ') : 'non specificati';
 
             // --- 2. Preparazione UI ---
             const resultBox = document.getElementById('result-box');
             resultBox.innerHTML = ` 
                 <h3 id="result-title"></h3>
-                <div class="result-section"><h4>Riepilogo Procedurale</h4><p id="proceduralNarrative" class="whitespace-pre-wrap"></p></div>
-                <div class="result-section"><h4>Gestione Pratica del Veicolo</h4><div id="gestioneVeicoloContent"></div></div>
-                <div class="result-section mt-4"><h4>Quadro Sanzionatorio e Misure Applicate</h4><ul id="sanctionsList" class="space-y-4"></ul></div>
+                <div class="result-section"><h4>Riepilogo Procedurale e Controllo Regolarità</h4><p id="proceduralNarrative" class="whitespace-pre-wrap text-sm leading-relaxed"></p></div>
+                <div class="result-section"><h4>Gestione Operativa del Veicolo</h4><div id="gestioneVeicoloContent"></div></div>
+                <div class="result-section mt-4"><h4>Quadro Sanzionatorio, PMR e Misure Applicate</h4><ul id="sanctionsList" class="space-y-4"></ul></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="result-section mt-4"><h4>Atti da Redigere</h4><ul id="actsList" class="space-y-2 list-disc list-inside"></ul></div>
-                    <div class="result-section mt-4"><h4>Adempimenti Successivi</h4><ul id="adempimentiList" class="space-y-2 list-disc list-inside"></ul></div>
+                    <div class="result-section mt-4"><h4>Atti da Redigere</h4><ul id="actsList" class="space-y-2 list-disc list-inside text-sm"></ul></div>
+                    <div class="result-section mt-4"><h4>Adempimenti Successivi</h4><ul id="adempimentiList" class="space-y-2 list-disc list-inside text-sm"></ul></div>
                 </div>
                 <div class="mt-8 flex flex-col md:flex-row gap-4">
                     <button type="button" onclick="showFacSimileModal()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl">Genera Fac-Simile Verbale</button>
@@ -849,13 +935,13 @@
             } else if (!isRefusal) {
                 if (formData.tipoAccertamento === 'etilometro') {
                     if (isNaN(formData.firstMeasurement) || isNaN(formData.secondMeasurement)) {
-                        resultBox.innerHTML = '<h3>Errore: Dati Mancanti</h3><p>Inserire i valori di entrambe le misurazioni.</p>';
+                        resultBox.innerHTML = '<h3>Errore: Dati Mancanti</h3><p>Inserire i valori numerici di entrambe le misurazioni spirometriche (es. 0.00 se negativo).</p>';
                         resultBox.style.display = 'block'; return;
                     }
                     finalTasso = Math.min(formData.firstMeasurement, formData.secondMeasurement);
                 } else {
                     if (isNaN(formData.tassoSanitario)) {
-                        resultBox.innerHTML = '<h3>Errore: Dati Mancanti</h3><p>Inserire il valore del tasso alcolemico rilevato.</p>';
+                        resultBox.innerHTML = '<h3>Errore: Dati Mancanti</h3><p>Inserire il valore numerico del tasso alcolemico rilevato dal referto sanitario.</p>';
                         resultBox.style.display = 'block'; return;
                     }
                     finalTasso = formData.tassoSanitario;
@@ -863,82 +949,252 @@
             }
             formData.finalTasso = finalTasso;
 
-            // --- 4. Logica Sanzionatoria ---
-            let multaMin, multaMax, arrestoMin = null, arrestoMax = null, sospensioneMin = 0, sospensioneMax = 0, punti = 0, titleText = "", normaViolata = "", isPenal = false;
-            const isArt186bis = (formData.drivingCategory === 'neopatentato' || formData.drivingCategory === 'under21');
+            // --- 4. Logica Sanzionatoria Precisa (Riforma L. 177/2024 + D.M. 02/07/2025) ---
+            let multaMin = 0, multaMax = 0, arrestoMin = null, arrestoMax = null, sospensioneMin = 0, sospensioneMax = 0, punti = 0, titleText = "", normaViolata = "", isPenal = false;
+            let sospensioneBreveGiorni = 0;
+            let concorsoArt125Text = null;
+            let alcolockObbligoAnni = 0;
+
+            const isArt186bis = ['neopatentato', 'under21', 'under18', 'professionale'].includes(formData.drivingCategory);
+            const isNeopatentatoPunti = (formData.drivingCategory === 'neopatentato') || formData.ancheNeopatentato;
+            const isProfessionalePesante = (formData.drivingCategory === 'professionale') || (formData.tipoVeicolo === 'veicolo_pesante_bus');
+            const isVelocipedeMonopattino = (formData.tipoVeicolo === 'velocipede_monopattino');
             const trueIsRefusal = isRefusal && !(formData.pmContattato && formData.esitoPm === 'disposto' && finalTasso !== null);
 
+            const alcolockManomesso = formData.hasCodici6869 && formData.statoAlcolock === 'mancante_manomesso';
+            const alcolockDocIrregolare = formData.hasCodici6869 && formData.docAlcolock === 'irregolare';
+
             if (trueIsRefusal) {
-                isPenal = true; titleText = "Reato: Rifiuto dell'Accertamento"; normaViolata = "Art. 186, c. 7, CdS";
-                multaMin = 1500; multaMax = 6000; arrestoMin = 6; arrestoMax = 12; // Mesi
+                isPenal = true;
+                titleText = "Reato Contravvenzionale: Rifiuto dell'Accertamento Alcolimetrico";
+                normaViolata = isArt186bis ? "Art. 186, c. 7 e Art. 186-bis, c. 6, CdS" : "Art. 186, c. 7, CdS";
+                multaMin = 1500; multaMax = 6000;
+                arrestoMin = 6; arrestoMax = 12; // Mesi
                 sospensioneMin = 6; sospensioneMax = 24; // Mesi
-            } else if (finalTasso < 0.5) {
-                if (isArt186bis && finalTasso > 0) {
-                    isPenal = false; titleText = "Illecito Amministrativo: Tolleranza Zero"; normaViolata = "Art. 186-bis, c. 2, CdS";
+                punti = 10;
+                alcolockObbligoAnni = 3;
+            } else if (finalTasso <= 0.50) {
+                // Caso <= 0,50 g/L (Soglia inclusa: "non superiore a 0,5 g/l")
+                if (finalTasso > 0 && isArt186bis) {
+                    isPenal = false;
+                    titleText = "Illecito Amministrativo: Violazione Obbligo Tolleranza Zero (0,00 < tasso ≤ 0,50 g/L)";
+                    normaViolata = "Art. 186-bis, c. 2, CdS";
                     multaMin = 168; multaMax = 672;
+                    punti = 5; // 5 punti base ex art. 186-bis c. 2 (raddoppiati a 10 solo se neopatentato)
+
+                    // Sospensione Breve ex Art. 218-ter, c. 1, lett. p) CdS
+                    if (!isVelocipedeMonopattino) {
+                        if (formData.fasciaPuntiPatente === '10_19') {
+                            sospensioneBreveGiorni = formData.haSinistro ? 14 : 7;
+                        } else if (formData.fasciaPuntiPatente === '1_9') {
+                            sospensioneBreveGiorni = formData.haSinistro ? 30 : 15;
+                        }
+                    }
+
+                    // Eventuale concorso con Art. 125 c. 3-quater se ha già codici 68/69
+                    if (formData.hasCodici6869) {
+                        normaViolata += " + Concorso Art. 125, c. 3-quater, CdS (Violazione Codici 68/69)";
+                        if (alcolockManomesso) {
+                            concorsoArt125Text = "In concorso: Art. 125, c. 3-quater, 2° per. CdS (sanzione raddoppiata da € 316 a € 1.276, PMR € 316,00 + Sospensione patente da 2 a 12 mesi per veicolo privo di Alcolock o sigilli manomessi).";
+                        } else {
+                            concorsoArt125Text = "In concorso: Art. 125, c. 3-quater, 1° per. CdS (sanzione da € 158 a € 638, PMR € 158,00 + Sospensione patente da 1 a 6 mesi per violazione Codice 68 'Niente alcool').";
+                        }
+                    }
+                } else if (formData.hasCodici6869 && (finalTasso > 0 || alcolockManomesso || alcolockDocIrregolare)) {
+                    // Conducente standard con Codici 68/69 che viola il codice 68 (0 < tasso <= 0,50) o circola senza alcolock / documenti
+                    isPenal = false;
+                    if (alcolockManomesso) {
+                        titleText = "Illecito Amministrativo: Violazione Codici 68/69 (Veicolo sprovvisto di Alcolock o Dispositivo/Sigilli manomessi)";
+                        normaViolata = "Art. 125, c. 3-quater, 2° periodo (in rel. a c. 3 e 5), CdS";
+                        multaMin = 316; multaMax = 1276;
+                        sospensioneMin = 2; sospensioneMax = 12;
+                    } else {
+                        titleText = finalTasso > 0
+                            ? "Illecito Amministrativo: Violazione Codice Unionale 68 'Niente alcool' (0,00 < tasso ≤ 0,50 g/L)"
+                            : "Illecito Amministrativo: Circolazione in condizioni difformi dai Codici 68/69 (Mancanza Dichiarazione Installazione / Taratura Alcolock)";
+                        normaViolata = "Art. 125, c. 3-quater, 1° periodo (in rel. a c. 3 e 5), CdS";
+                        multaMin = 158; multaMax = 638;
+                        sospensioneMin = 1; sospensioneMax = 6;
+                    }
+                    punti = 0;
                 } else {
-                    resultBox.innerHTML = `<h3>Nessuna Violazione Rilevata</h3><p>Il tasso alcolemico di ${finalTasso} g/L è al di sotto della soglia di legge.</p>`;
+                    resultBox.innerHTML = `<h3 class="text-green-700">Nessuna Violazione Rilevata</h3><p class="mt-2">Il tasso alcolemico di <strong>${finalTasso.toFixed(2)} g/L</strong> è entro il limite consentito per la categoria selezionata (${isArt186bis || formData.hasCodici6869 ? '0,00 g/L' : '≤ 0,50 g/L'}) e non risultano irregolarità sulle prescrizioni Alcolock.</p>`;
                     resultBox.style.display = 'block'; return;
                 }
-            } else if (finalTasso < 0.8) {
-                isPenal = false; titleText = `Illecito Amministrativo (Fascia A)`; normaViolata = "Art. 186, c. 2, lett. a), CdS";
-                multaMin = 543; multaMax = 2170; sospensioneMin = 3; sospensioneMax = 6;
-            } else if (finalTasso < 1.5) {
-                isPenal = true; titleText = `Reato Contravvenzionale (Fascia B)`; normaViolata = "Art. 186, c. 2, lett. b), CdS";
-                multaMin = 800; multaMax = 3200; arrestoMin = 0; arrestoMax = 6;
+            } else if (finalTasso <= 0.80) {
+                // FASCIA A: superiore a 0,50 e non superiore a 0,80 g/L
+                isPenal = false;
+                titleText = `Illecito Amministrativo – Fascia A (0,50 < tasso ≤ 0,80 g/L)`;
+                normaViolata = "Art. 186, c. 2, lett. a), CdS";
+                multaMin = 543; multaMax = 2170;
+                sospensioneMin = 3; sospensioneMax = 6;
+                punti = 10;
+            } else if (finalTasso <= 1.50) {
+                // FASCIA B: superiore a 0,80 e non superiore a 1,50 g/L
+                isPenal = true;
+                titleText = `Reato Contravvenzionale – Fascia B (0,80 < tasso ≤ 1,50 g/L)`;
+                normaViolata = "Art. 186, c. 2, lett. b), CdS";
+                multaMin = 800; multaMax = 3200;
+                arrestoMin = 0; arrestoMax = 6;
                 sospensioneMin = 6; sospensioneMax = 12;
+                punti = 10;
+                alcolockObbligoAnni = 2; // Art. 186, c. 9-ter CdS
             } else {
-                isPenal = true; titleText = `Reato Contravvenzionale (Fascia C)`; normaViolata = "Art. 186, c. 2, lett. c), CdS";
-                multaMin = 1500; multaMax = 6000; arrestoMin = 6; arrestoMax = 12;
+                // FASCIA C: superiore a 1,50 g/L
+                isPenal = true;
+                titleText = `Reato Contravvenzionale – Fascia C (tasso > 1,50 g/L)`;
+                normaViolata = "Art. 186, c. 2, lett. c), CdS";
+                multaMin = 1500; multaMax = 6000;
+                arrestoMin = 6; arrestoMax = 12;
                 sospensioneMin = 12; sospensioneMax = 24;
+                punti = 10;
+                alcolockObbligoAnni = 3; // Art. 186, c. 9-ter CdS
             }
-            formData.isPenal = isPenal; formData.normaViolata = normaViolata;
             
-            // --- 5. Aggravanti e Aumenti ---
+            // --- 5. Aggravanti e Aumenti (Art. 186-bis, Codici 68/69 c. 9-quater, Notturna, Sinistro) ---
             let multaExplanation = [], patenteExplanation = [], arrestoExplanation = [];
-            const isReatoGrave = isPenal && (finalTasso >= 1.5 || trueIsRefusal);
+            const isFasciaCOrRefusal = isPenal && (finalTasso > 1.50 || trueIsRefusal);
+            const isReato186 = isPenal; // Fascia B, Fascia C o Rifiuto
+            const isViolazioneArt186 = (finalTasso > 0.50 || trueIsRefusal);
 
-            if (isArt186bis && (finalTasso >= 0.5 || isRefusal)) {
-                 const aumento = isReatoGrave ? 0.5 : 1/3;
-                 multaMin = Math.round(multaMin * (1 + aumento)); multaMax = Math.round(multaMax * (1 + aumento));
-                 multaExplanation.push("aumentata per Art. 186-bis");
-            }
-            if (formData.infractionTime === 'night' && isPenal) {
-                multaMin = Math.round(multaMin * (1 + 1/3)); multaMax = Math.round(multaMax * 1.5);
-                multaExplanation.push("aumentata per orario notturno");
-            }
-            if (formData.haSinistro) {
-                multaMin *= 2; multaMax *= 2; multaExplanation.push("raddoppiata per sinistro");
-                if (isPenal && arrestoMax > 0) {
-                    arrestoMin *= 2; arrestoMax *= 2;
-                    arrestoExplanation.push("raddoppiata per sinistro");
+            // 5.1 Aumento per Art. 186-bis c. 3 e c. 6
+            if (isArt186bis && isViolazioneArt186) {
+                if (!isPenal) {
+                    // Fascia A (0.50 < tasso <= 0.80): aumentata di 1/3
+                    multaMin = +(multaMin * (4 / 3)).toFixed(2);
+                    multaMax = +(multaMax * (4 / 3)).toFixed(2);
+                    sospensioneMin = +(sospensioneMin * (4 / 3)).toFixed(1);
+                    sospensioneMax = +(sospensioneMax * (4 / 3)).toFixed(1);
+                    multaExplanation.push("aumentata di 1/3 ex Art. 186-bis, c. 3");
+                    patenteExplanation.push("aumentata di 1/3 ex Art. 186-bis, c. 3");
+                    normaViolata += " in rel. a Art. 186-bis, c. 3";
+                } else {
+                    // Fascia B, C o Rifiuto: aumentata da 1/3 alla metà (min +1/3, max +1/2)
+                    multaMin = Math.round(multaMin * (4 / 3));
+                    multaMax = Math.round(multaMax * 1.5);
+                    multaExplanation.push("aumentata da 1/3 alla metà ex Art. 186-bis, c. 3/6");
+                    if (!trueIsRefusal) normaViolata += " in rel. a Art. 186-bis, c. 3";
                 }
             }
 
-            if (isReatoGrave && formData.proprietaTerzi) {
-                sospensioneMin *= 2; sospensioneMax *= 2;
-                patenteExplanation.push("raddoppiata per veicolo di terzi");
+            // 5.2 Aumento / Raddoppio per Codici Unionali 68 e 69 (Art. 186, c. 9-quater - L. 177/2024)
+            if (formData.hasCodici6869 && isViolazioneArt186) {
+                if (alcolockManomesso) {
+                    multaMin = +(multaMin * 2).toFixed(2);
+                    multaMax = +(multaMax * 2).toFixed(2);
+                    sospensioneMin = +(sospensioneMin * 2).toFixed(1);
+                    sospensioneMax = +(sospensioneMax * 2).toFixed(1);
+                    if (arrestoMax > 0) { arrestoMin *= 2; arrestoMax *= 2; arrestoExplanation.push("raddoppiato ex Art. 186, c. 9-quater, 2° per. per manomissione/assenza Alcolock"); }
+                    multaExplanation.push("raddoppiata ex Art. 186, c. 9-quater, 2° per. per manomissione/assenza Alcolock");
+                    patenteExplanation.push("raddoppiata ex Art. 186, c. 9-quater, 2° per.");
+                    normaViolata += " e c. 9-quater (2° per.) + Art. 125, c. 3-quater";
+                    concorsoArt125Text = "In concorso materiale: Art. 125, c. 3-quater, 2° per. CdS (sanzione da € 316 a € 1.276, PMR € 316,00 + Sospensione patente da 2 a 12 mesi per dispositivo Alcolock assente/manomesso o sigilli rimossi).";
+                } else {
+                    multaMin = +(multaMin * (4 / 3)).toFixed(2);
+                    multaMax = +(multaMax * (4 / 3)).toFixed(2);
+                    sospensioneMin = +(sospensioneMin * (4 / 3)).toFixed(1);
+                    sospensioneMax = +(sospensioneMax * (4 / 3)).toFixed(1);
+                    if (arrestoMax > 0) { arrestoExplanation.push("aumentato di 1/3 ex Art. 186, c. 9-quater, 1° per."); }
+                    multaExplanation.push("aumentata di 1/3 ex Art. 186, c. 9-quater, 1° per. (titolare Codici 68/69)");
+                    patenteExplanation.push("aumentata di 1/3 ex Art. 186, c. 9-quater, 1° per.");
+                    normaViolata += " e c. 9-quater (1° per.)";
+                }
+            }
+
+            // 5.3 Aggravante Notturna (22:00 - 07:00) ex Art. 186, c. 2-sexies (Solo per le ammende penali)
+            if (formData.infractionTime === 'night' && isPenal) {
+                multaMin = Math.round(multaMin * (4 / 3));
+                multaMax = Math.round(multaMax * 1.5);
+                multaExplanation.push("aumentata da 1/3 alla metà per orario notturno (22:00–07:00) ex c. 2-sexies");
+            }
+
+            // 5.4 Aggravante Sinistro Stradale ex Art. 186, c. 2-bis
+            if (formData.haSinistro && (isViolazioneArt186 || (isArt186bis && finalTasso > 0))) {
+                multaMin = +(multaMin * 2).toFixed(2);
+                multaMax = +(multaMax * 2).toFixed(2);
+                multaExplanation.push("raddoppiata per aver provocato sinistro stradale ex Art. 186, c. 2-bis");
+                if (sospensioneMax > 0) {
+                    sospensioneMin = +(sospensioneMin * 2).toFixed(1);
+                    sospensioneMax = +(sospensioneMax * 2).toFixed(1);
+                    patenteExplanation.push("raddoppiata per sinistro ex c. 2-bis");
+                }
+                if (isPenal && arrestoMax > 0) {
+                    arrestoMin *= 2; arrestoMax *= 2;
+                    arrestoExplanation.push("raddoppiato per sinistro ex c. 2-bis");
+                }
+                normaViolata += " e c. 2-bis (Sinistro)";
+            }
+
+            // 5.5 Raddoppio Sospensione Patente se Veicolo di Terzi Estranei in Fascia C o Rifiuto
+            if (isFasciaCOrRefusal && formData.proprietaTerzi && !isVelocipedeMonopattino) {
+                sospensioneMin = +(sospensioneMin * 2).toFixed(1);
+                sospensioneMax = +(sospensioneMax * 2).toFixed(1);
+                patenteExplanation.push("raddoppiata poiché veicolo appartenente a persona estranea al reato");
             }
             
+            // 5.6 Verifica Casi di REVOCA DELLA PATENTE
             let isSospensionRevoked = false;
-            if (formData.isRecidivo && isPenal) { isSospensionRevoked = true; patenteExplanation.push("disposta per recidiva"); }
-            if (formData.haSinistro && isReatoGrave) { isSospensionRevoked = true; patenteExplanation.push("disposta per incidente grave"); }
+            if (!isVelocipedeMonopattino) {
+                if (formData.isRecidivo && isFasciaCOrRefusal) {
+                    isSospensionRevoked = true;
+                    patenteExplanation.push("REVOCA obbligatoria per recidiva nel biennio");
+                }
+                if (formData.isRecidivo && isArt186bis && isPenal) {
+                    isSospensionRevoked = true;
+                    patenteExplanation.push("REVOCA obbligatoria per recidiva nel triennio ex Art. 186-bis, c. 3/6");
+                }
+                if (formData.haSinistro && isFasciaCOrRefusal) {
+                    isSospensionRevoked = true;
+                    patenteExplanation.push("REVOCA obbligatoria per sinistro stradale in Fascia C / Rifiuto ex Art. 186, c. 2-bis");
+                }
+                if (isProfessionalePesante && finalTasso > 1.50) {
+                    isSospensionRevoked = true;
+                    patenteExplanation.push("REVOCA obbligatoria già alla 1ª violazione per conducenti professionali / mezzi pesanti ex Art. 186-bis, c. 5");
+                }
+            }
             
-            // --- 6. Punti ---
-            if (finalTasso > 0 || isRefusal) punti = 10;
-            if (formData.haSinistro && punti > 0) punti *= 2;
+            // --- 6. Punti Patente (Raddoppio solo per Neopatentati ex Art. 126-bis, NON per sinistro, e ZERO per velocipede/monopattino) ---
+            let puntiExplanation = [];
+            if (isVelocipedeMonopattino) {
+                punti = 0;
+            } else if (punti > 0 && isNeopatentatoPunti) {
+                punti *= 2;
+                puntiExplanation.push("raddoppiati per conducente neopatentato");
+            }
+
+            // --- 6-bis. Calcolo Pagamento in Misura Ridotta (PMR - Art. 202 CdS) per Illeciti Amministrativi ---
+            let pmrSummaryText = null;
+            if (!isPenal) {
+                const pmr60gg = multaMin; // Per illeciti CdS il PMR entro 60 gg è pari al minimo edittale
+                const haSanzioneAccessoriaPatente = (sospensioneMax > 0) || (sospensioneBreveGiorni > 0) || isSospensionRevoked;
+                if (!haSanzioneAccessoriaPatente) {
+                    const pmr5gg = +(pmr60gg * 0.70).toFixed(2);
+                    pmrSummaryText = `PMR entro 60 gg: ${formatCurrency(pmr60gg)} — Riduzione 30% entro 5 gg AMMESSA: ${formatCurrency(pmr5gg)} (non ricorrendo sospensione patente).`;
+                } else {
+                    pmrSummaryText = `PMR entro 60 gg: ${formatCurrency(pmr60gg)} — Riduzione 30% entro 5 gg ESCLUSA (Art. 202, c. 1, CdS: presente sanzione accessoria della sospensione patente${sospensioneBreveGiorni > 0 ? ' breve ex Art. 218-ter' : ''}).`;
+                }
+            }
+
+            formData.isPenal = isPenal;
+            formData.normaViolata = normaViolata;
+            formData.sospensioneBreveGiorni = sospensioneBreveGiorni;
+            formData.pmrSummaryText = pmrSummaryText;
 
             // --- 7. Testi e Atti ---
             const isPatenteItaliana = formData.tipoPatente === 'italiana';
-            let proceduralNarrative = `A seguito di stato sintomatico (${formData.sintomi})`;
-            if (formData.usoPrecursore) proceduralNarrative += ` e di test con precursore positivo,`;
-            proceduralNarrative += ` si è proceduto ad accertamento.\n`;
+            let proceduralNarrative = `A seguito di riscontro sintomatico (${formData.sintomi})`;
+            if (formData.usoPrecursore) proceduralNarrative += ` e di pre-test qualitativo positivo (art. 186, c. 3, CdS),`;
+            proceduralNarrative += ` si è proceduto ad accertamento tecnico.\n`;
             
+            if (formData.hasCodici6869) {
+                proceduralNarrative += `\n• <strong>Controllo Codici Unionali 68/69 (Alcolock - D.M. MIT 02/07/2025):</strong> Dispositivo/Sigillo: <em>${alcolockManomesso ? 'MANCANTE / MANOMESSO / SIGILLO RIMOSSO' : 'Regolare e integro'}</em> | Documentazione in originale (Dichiarazione installazione + Taratura valida): <em>${alcolockDocIrregolare ? 'MANCANTE / IRREGOLARE' : 'Regolarmente esibita'}</em>.\n`;
+            }
+
             if (!isPatenteItaliana) {
                 if (formData.comprendeItaliano) {
-                    proceduralNarrative += `\nSi dà atto che il conducente, titolare di patente estera, dichiara di comprendere e parlare correntemente la lingua italiana.\n`;
+                    proceduralNarrative += `\n• Conducente titolare di patente estera che comprende e parla correntemente la lingua italiana.\n`;
                 } else {
-                    proceduralNarrative += `\n<strong class="text-red-600">NOTA: Poiché il conducente non comprende la lingua italiana, gli avvisi di legge sono stati forniti tramite interprete.</strong>\n`;
+                    proceduralNarrative += `\n<strong class="text-red-600">• ATTENZIONE: Poiché il conducente non comprende la lingua italiana, gli avvisi di legge e gli atti devono essere tradotti tramite interprete nominato ausiliario di P.G. (art. 143 c.p.p.).</strong>\n`;
                 }
             }
 
@@ -948,145 +1204,227 @@
                 const orarioAvvisoText = formData.orarioAvviso ? `alle ore ${formData.orarioAvviso}` : '';
                 const nomeAvvocatoText = formData.nomeAvvocato ? `l'Avv. ${formData.nomeAvvocato}` : 'il proprio difensore';
                 switch (formData.rispostaDifensore) {
-                    case 'rinuncia': avvisoDifensoreText = `Il conducente ${orarioAvvisoText}, ha rinunciato alla facoltà di farsi assistere.`; break;
-                    case 'assente': avvisoDifensoreText = `Il conducente ${orarioAvvisoText}, ha richiesto l'assistenza de ${nomeAvvocatoText}, non giunto/reperibile in tempo utile.`; break;
-                    case 'presente': avvisoDifensoreText = `Le operazioni si sono svolte alla presenza de ${nomeAvvocatoText}, contattato dal conducente ${orarioAvvisoText}.`; break;
+                    case 'rinuncia': avvisoDifensoreText = `Il conducente ${orarioAvvisoText} ha dichiarato di rinunciare alla facoltà di farsi assistere.`; break;
+                    case 'assente': avvisoDifensoreText = `Il conducente ${orarioAvvisoText} ha richiesto l'assistenza de ${nomeAvvocatoText}, non giunto in tempo utile.`; break;
+                    case 'presente': avvisoDifensoreText = `Le operazioni si sono svolte alla presenza de ${nomeAvvocatoText}, avvisato ${orarioAvvisoText}.`; break;
                     case 'nessuno': avvisoDifensoreText = `Il conducente ${orarioAvvisoText}, edotto della facoltà, non ha nominato un difensore.`; break;
                 }
-                proceduralNarrative += `\nPrevio avviso di legge, ${avvisoDifensoreText}\n\n`;
+                proceduralNarrative += `\n• <strong>Avviso ex art. 114 disp. att. c.p.p.:</strong> ${avvisoDifensoreText}\n`;
             }
 
             if (isRefusal) {
                 const infoConseguenze = formData.infoConseguenzeEtilometro || formData.infoConseguenzeSanitario;
                 proceduralNarrative += infoConseguenze 
-                    ? "Il conducente, edotto delle conseguenze penali, ha rifiutato di sottoporsi all'accertamento richiesto.\n"
-                    : "Il conducente ha rifiutato di sottoporsi all'accertamento richiesto.\n";
+                    ? "\n• Il conducente, preventivamente edotto delle conseguenze penali ex art. 186, c. 7, CdS, ha rifiutato di sottoporsi all'accertamento.\n"
+                    : "\n• <strong class='text-amber-700'>NOTA OPERATIVA:</strong> Dare espressamente atto a verbale di aver informato il conducente delle conseguenze penali del rifiuto.\n";
                 
                 if (formData.pmContattato) {
-                    proceduralNarrative += `\nAlle ore ${formData.orarioPm || '[ora]'} è stato contattato il P.M. di turno, Dott. ${formData.nomePm || '[nome]'}, il quale ha ${formData.esitoPm === 'disposto' ? 'DISPOSTO' : 'NON HA DISPOSTO'} il prelievo coattivo.\n`;
-                    if(formData.esitoPm === 'disposto') proceduralNarrative += `Si è proceduto con prelievo coattivo, che ha dato esito ${finalTasso} g/L.`
+                    proceduralNarrative += `• Contattato alle ore ${formData.orarioPm || '[ora]'} il P.M. di turno Dott. ${formData.nomePm || '[nome]'}: ${formData.esitoPm === 'disposto' ? `DISPOSTO prelievo coattivo ex art. 359-bis c.p.p. (esito: ${finalTasso.toFixed(2)} g/L).` : 'NON disposto prelievo coattivo.'}\n`;
                 }
 
             } else if (formData.tipoAccertamento === 'etilometro') {
-                 let details = `mod. ${formData.etilometroTipo||'N/D'}, matr. ${formData.matricolaNumero||'N/D'}, omologazione ${formData.omologazioneNumero||'N/D'}, taratura ${formData.taraturaData||'N/D'}`;
-                proceduralNarrative += `L'accertamento con etilometro (${details}) ha dato i seguenti esiti:\n- 1ª Prova (${formData.firstMeasurementTime || '--:--'}): ${formData.firstMeasurement} g/L\n- 2ª Prova (${formData.secondMeasurementTime || '--:--'}): ${formData.secondMeasurement} g/L\n`;
-                const t1 = new Date(`1970-01-01T${formData.firstMeasurementTime}`);
-                const t2 = new Date(`1970-01-01T${formData.secondMeasurementTime}`);
+                let details = `mod. ${formData.etilometroTipo||'N/D'}, matr. ${formData.matricolaNumero||'N/D'}, omolog. ${formData.omologazioneNumero||'N/D'}, ultima taratura ${formData.taraturaData||'N/D'}`;
+                proceduralNarrative += `\n• <strong>Prove Etilometriche (${details}):</strong>\n  - 1ª Prova (${formData.firstMeasurementTime || '--:--'}): ${formData.firstMeasurement.toFixed(2)} g/L\n  - 2ª Prova (${formData.secondMeasurementTime || '--:--'}): ${formData.secondMeasurement.toFixed(2)} g/L\n`;
                 if (formData.firstMeasurementTime && formData.secondMeasurementTime) {
+                    const t1 = new Date(`1970-01-01T${formData.firstMeasurementTime}`);
+                    const t2 = new Date(`1970-01-01T${formData.secondMeasurementTime}`);
                     const diff = Math.abs(t2 - t1) / 60000;
-                    proceduralNarrative += `L'intervallo di ${diff} minuti tra le prove è ${diff >= 5 ? 'conforme' : 'NON conforme'} alla normativa.\n`;
+                    proceduralNarrative += `  - Intervallo tra le due prove: <strong>${diff} minuti</strong> (${diff >= 5 ? '<span class="text-green-700 font-semibold">conforme ≥ 5 min ex art. 379 Reg. CdS</span>' : '<span class="text-red-600 font-bold">ATTENZIONE: inferiore a 5 min! Ripetere a distanza di almeno 5 minuti</span>'}).\n`;
                 }
-                proceduralNarrative += `> Valore considerato: ${finalTasso} g/L.\n`;
+                proceduralNarrative += `  - <strong>Valore probatorio considerato (più favorevole): ${finalTasso.toFixed(2)} g/L.</strong>\n`;
             } else {
-                if (formData.contestoPrelievo === 'cura') proceduralNarrative += `Acquisito referto medico da prelievo per fini di cura, che ha rilevato un tasso di ${finalTasso} g/L.\n`;
-                else proceduralNarrative += `L'accertamento tramite analisi ematica richiesta ha rilevato un tasso di ${finalTasso} g/L.\n`;
+                if (formData.contestoPrelievo === 'cura') proceduralNarrative += `\n• Acquisito referto sanitario da prelievo eseguito per fini di cura: tasso rilevato <strong>${finalTasso.toFixed(2)} g/L</strong>.\n`;
+                else proceduralNarrative += `\n• Analisi ematica eseguita su richiesta della P.G. ex art. 186, c. 5, CdS: tasso rilevato <strong>${finalTasso.toFixed(2)} g/L</strong>.\n`;
             }
-            if (formData.haSinistro) proceduralNarrative += "\nL'accertamento è avvenuto in conseguenza di un sinistro stradale. ";
             
-            let actsToDrawUp = [isPatenteItaliana ? "Ritiro della Patente di Guida" : "Ritiro del Documento di Guida Estero"];
-            if(isPenal) { actsToDrawUp.push("Verbale di Accertamenti Urgenti", "Verbale di Identificazione e Elezione di Domicilio"); }
-            else { actsToDrawUp.push("Verbale di Contestazione Amministrativa"); }
+            // --- Atti da redigere ---
+            let actsToDrawUp = [];
+            if (!isVelocipedeMonopattino) {
+                if (sospensioneMax > 0 || isSospensionRevoked) {
+                    actsToDrawUp.push(isPatenteItaliana ? "Ritiro immediato della Patente di Guida (Art. 218 / 223 CdS)" : "Ritiro del Documento di Guida Estero (per inibizione alla guida ex Art. 135/136-ter CdS)");
+                } else if (sospensioneBreveGiorni > 0) {
+                    actsToDrawUp.push(`Verbale di Ritiro Patente e Sospensione Breve immediata per ${sospensioneBreveGiorni} giorni (Art. 218-ter, c. 1, lett. p, CdS)`);
+                }
+            }
+            if (isPenal) {
+                actsToDrawUp.push("Verbale di Accertamenti Urgenti sulla Persona (Art. 354 c.p.p.) e Avviso Difensore (Art. 114 disp. att. c.p.p.)");
+                actsToDrawUp.push("Verbale di Identificazione, Nomina Difensore ed Elezione di Domicilio (Art. 349 e 161 c.p.p.)");
+                if (formData.haSinistro || !isPatenteItaliana) {
+                    actsToDrawUp.push("Eventuale Verbale di Contestazione per violazioni amministrative connesse");
+                }
+            } else {
+                actsToDrawUp.push("Verbale di Contestazione di Violazione Amministrativa CdS");
+                if (requiresDifensoreNotice) {
+                    actsToDrawUp.push("Verbale di Accertamento Tecnico Etilometrico e Avviso ex Art. 114 disp. att. c.p.p.");
+                }
+            }
+            if (concorsoArt125Text) {
+                actsToDrawUp.push("Verbale di Contestazione ex Art. 125, c. 3-quater, CdS (Violazione prescrizioni Codici 68/69 - Alcolock)");
+            }
+            if (!isPatenteItaliana && !formData.comprendeItaliano) { actsToDrawUp.push("Verbale di Nomina di Interprete (Ausiliario di P.G. ex Art. 143 e 348 c. 4 c.p.p.)"); }
+            if (formData.haSinistro) { actsToDrawUp.push("Fascicolo Rilievi di Sinistro Stradale"); }
+            if (formData.tipoAccertamento === 'sanitario' && formData.contestoPrelievo === 'richiesta') {
+                actsToDrawUp.push("Richiesta di Accertamenti Urgenti alla Direzione Sanitaria (Mod. 4) + Consenso Informato (Mod. 1-bis)");
+            }
+            if (formData.pmContattato) { actsToDrawUp.push("Annotazione di P.G. su interlocuzione e disposizioni del P.M. di turno"); }
             
-            if (!isPatenteItaliana && !formData.comprendeItaliano) { actsToDrawUp.push("Verbale di Nomina Interprete"); }
-            if (formData.haSinistro) { actsToDrawUp.push("Rilievo di Sinistro Stradale"); }
-            if (formData.tipoAccertamento === 'sanitario' && formData.contestoPrelievo === 'richiesta') { actsToDrawUp.push("Verbale di Nomina ad Ausiliario di P.G. (personale sanitario)"); }
-            if (formData.pmContattato) { actsToDrawUp.push("Annotazione su contatto e disposizione P.M."); }
-            
+            // --- Gestione Operativa del Veicolo (Art. 224-ter, Art. 213 c. 2-sexies, Art. 214, Art. 186 c. 2-bis) ---
             let gestioneVeicoloHTML = "";
             const isMotociclo = formData.tipoVeicolo === 'motociclo_ciclomotore';
             let vehicleActionTaken = false;
 
-            if (isReatoGrave && !formData.proprietaTerzi) {
-                 if (isMotociclo) {
-                    gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>FERMO AMMINISTRATIVO (180 giorni)</div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Affidare a depositeria autorizzata. Compilare 'Verbale di Fermo Amministrativo'.</div></div>`;
-                    actsToDrawUp.push("Verbale di Fermo Amministrativo");
-                } else {
-                    gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>SEQUESTRO PREVENTIVO AI FINI DELLA CONFISCA<span class="info-icon" onclick="showInfoModal('rifiuto')">i</span></div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Affidare a depositeria autorizzata. Compilare 'Verbale di Sequestro Preventivo'.</div></div>`;
-                    actsToDrawUp.push("Verbale di Sequestro Preventivo ai fini della confisca");
-                }
-                vehicleActionTaken = true;
-            }
-            
-            if (!vehicleActionTaken && formData.haSinistro && !formData.proprietaTerzi) {
-                gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>FERMO AMMINISTRATIVO (180 giorni)<span class="info-icon" onclick="showInfoModal('aggravanteSinistro')">i</span></div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Affidare a depositeria autorizzata. Compilare 'Verbale di Fermo Amministrativo'.</div></div>`;
-                actsToDrawUp.push("Verbale di Fermo Amministrativo");
+            // 1) Se Ciclomotore o Motociclo e il fatto è REATO (quindi già dalla Fascia B > 0,80 g/L, Fascia C > 1,50 g/L o Rifiuto c. 7!) -> Art. 213, c. 2-sexies CdS
+            if (isMotociclo && isReato186 && !formData.proprietaTerzi) {
+                gestioneVeicoloHTML = `
+                    <div class="gestione-veicolo-item"><strong>MISURA:</strong><div class="font-bold text-red-700">SEQUESTRO AMMINISTRATIVO AI FINI DELLA CONFISCA (Art. 213, c. 2-sexies e Art. 224-ter CdS)<span class="info-icon" onclick="showInfoModal('veicoloInfo')">i</span></div></div>
+                    <div class="gestione-veicolo-item"><strong>NORMA:</strong><div>Poiché il ciclomotore/motoveicolo è stato adoperato per commettere un reato (già dalla Fascia B > 0,80 g/L), è SEMPRE disposta la confisca amministrativa.</div></div>
+                    <div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Affidamento OBBLIGATORIO in custodia al custode-acquirente convenzionato per 30 giorni (decorsi i quali il proprietario può chiedere l'affidamento). Redigere <em>Verbale di Sequestro Amministrativo ex artt. 213 c. 2-sexies e 224-ter CdS</em>.</div></div>
+                `;
+                actsToDrawUp.push("Verbale di Sequestro Amministrativo ai fini della Confisca (Artt. 213, c. 2-sexies e 224-ter CdS)");
                 vehicleActionTaken = true;
             }
 
-            if (!vehicleActionTaken) {
-                 let reason = (isReatoGrave && formData.proprietaTerzi) ? 'AFFIDAMENTO A PERSONA IDONEA<span class="info-icon" onclick="showInfoModal(\'proprietaTerzi\')">i</span>' : 'AFFIDAMENTO A PERSONA IDONEA';
-                 let procedure = (isReatoGrave && formData.proprietaTerzi) ? "Affidare al proprietario o a persona idonea. Compilare 'Verbale di Affidamento'." : "Affidare a passeggero sobrio/proprietario/reperibile o chiamare soccorso stradale. Compilare 'Verbale di Affidamento'.";
-                 gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>${reason}</div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>${procedure}</div></div>`;
+            // 2) Se Autoveicolo / Altro veicolo in Fascia C (> 1,50 g/L) o Rifiuto (c. 7) e NON di proprietà di terzi estranei -> Sequestro Amministrativo ai fini della Confisca ex Art. 224-ter e 213 CdS
+            if (!vehicleActionTaken && isFasciaCOrRefusal && !formData.proprietaTerzi) {
+                gestioneVeicoloHTML = `
+                    <div class="gestione-veicolo-item"><strong>MISURA:</strong><div class="font-bold text-red-700">SEQUESTRO AMMINISTRATIVO AI FINI DELLA CONFISCA (Artt. 186, c. 2, lett. c / c. 7, 224-ter, c. 1 e 213 CdS)<span class="info-icon" onclick="showInfoModal('rifiuto')">i</span></div></div>
+                    <div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Redigere <em>Verbale di Sequestro Amministrativo ai fini della Confisca ex artt. 224-ter e 213 CdS</em>. Il veicolo è affidato in custodia al proprietario/trasgressore (se idoneo e provvisto di luogo non soggetto a pubblico passaggio, previo soccorso stradale) ovvero al custode-acquirente convenzionato in caso di assenza requisiti/rifiuto custodia.</div></div>
+                `;
+                actsToDrawUp.push("Verbale di Sequestro Amministrativo ai fini della Confisca (Artt. 224-ter, c. 1 e 213 CdS)");
+                vehicleActionTaken = true;
             }
             
-            let adempimenti = [
-                isPatenteItaliana ? "Invio patente alla Prefettura (entro 10 giorni)." : "Invio patente alla Prefettura (entro 10 giorni) per emissione provvedimento di inibizione alla guida.",
-                "A carico del conducente: Visita C.M.L. (entro 60 gg)."
-            ];
-            if (isPenal) adempimenti.unshift("Trasmissione Notizia di Reato alla Procura (immediata).");
-            if(formData.tipoAccertamento === 'sanitario') {
-                adempimenti.push("Acquisire documentazione sanitaria completa.");
-                adempimenti.push("Garantire e documentare la catena di custodia dei campioni.");
+            // 3) Se ha provocato un Sinistro Stradale (Art. 186, c. 2-bis) e non è già sequestrato per confisca e non appartiene a terzi estranei -> Fermo Amministrativo 180 giorni
+            if (!vehicleActionTaken && formData.haSinistro && !formData.proprietaTerzi) {
+                gestioneVeicoloHTML = `
+                    <div class="gestione-veicolo-item"><strong>MISURA:</strong><div class="font-bold text-amber-700">FERMO AMMINISTRATIVO DEL VEICOLO PER 180 GIORNI (Artt. 186, c. 2-bis, 224-ter, c. 3 e 214 CdS)<span class="info-icon" onclick="showInfoModal('aggravanteSinistro')">i</span></div></div>
+                    <div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>Redigere <em>Verbale di Fermo Amministrativo ex artt. 186 c. 2-bis e 214 CdS</em> (sanzione accessoria conseguente a sinistro stradale). Affidare in custodia al proprietario (con trasporto a mezzo carro attrezzi in luogo idoneo) o a depositeria autorizzata.</div></div>
+                `;
+                actsToDrawUp.push("Verbale di Fermo Amministrativo del Veicolo per 180 giorni (Artt. 186, c. 2-bis e 214 CdS)");
+                vehicleActionTaken = true;
+            }
+
+            // 4) Negli altri casi (es. Fascia A/B senza sinistro, oppure veicolo appartenente a persona estranea al reato) -> Affidamento a persona idonea (Art. 186, c. 2-septies)
+            if (!vehicleActionTaken) {
+                let reason = formData.proprietaTerzi && (isFasciaCOrRefusal || formData.haSinistro)
+                    ? 'AFFIDAMENTO A PERSONA IDONEA / PROPRIETARIO TERZO (Esclusi Sequestro/Fermo per estraneità proprietario)<span class="info-icon" onclick="showInfoModal(\'proprietaTerzi\')">i</span>'
+                    : 'AFFIDAMENTO DEL VEICOLO A PERSONA IDONEA (Art. 186, c. 2-septies CdS)';
+                let procedure = "Il veicolo non può essere condotto dal trasgressore: affidarlo a persona idonea munita di patente (previo controllo sobrietà) prontamente reperibile sul posto o, in mancanza, farlo trasportare fino al luogo indicato dall'interessato/autorizzato a spese del trasgressore. Redigere 'Verbale di Affidamento del Veicolo'.";
+                gestioneVeicoloHTML = `<div class="gestione-veicolo-item"><strong>MISURA:</strong><div>${reason}</div></div><div class="gestione-veicolo-item"><strong>PROCEDURA:</strong><div>${procedure}</div></div>`;
+                actsToDrawUp.push("Verbale di Affidamento del Veicolo a Persona Idonea (Art. 186, c. 2-septies CdS)");
+            }
+            
+            // --- Adempimenti Successivi ---
+            let adempimenti = [];
+            if (isPenal) {
+                adempimenti.push("Trasmissione Comunicazione di Notizia di Reato (C.N.R. ex art. 347 c.p.p.) alla Procura della Repubblica (allegando scontrini etilometro / referti sanitari, verbale art. 354 c.p.p. e avviso art. 114 disp. att. c.p.p.).");
+            }
+            if (!isVelocipedeMonopattino) {
+                if (sospensioneMax > 0 || isSospensionRevoked) {
+                    adempimenti.push(isPatenteItaliana
+                        ? "Trasmissione della patente ritirata e copia degli atti alla Prefettura competente (entro 10 giorni ex artt. 218 / 223 CdS)."
+                        : "Trasmissione del documento di guida estero alla Prefettura (entro 10 giorni) per l'emissione del provvedimento di inibizione alla guida sul territorio nazionale (Art. 135 / 136-ter CdS).");
+                } else if (sospensioneBreveGiorni > 0) {
+                    adempimenti.push(`Conservazione della patente presso l'Ufficio/Comando per i ${sospensioneBreveGiorni} giorni di Sospensione Breve (Art. 218-ter CdS) e inserimento immediato del provvedimento in banca dati SDI / Anagrafe Nazionale.`);
+                }
+            }
+            if (alcolockObbligoAnni > 0 && !isSospensionRevoked && isPatenteItaliana) {
+                adempimenti.push(`A seguito di condanna definitiva: Revisione patente ex art. 128 CdS e apposizione dei Codici Unionali 68 ("Niente alcool") e 69 ("Obbligo Alcolock EN 50436") per almeno ${alcolockObbligoAnni} anni dalla restituzione (Art. 186, c. 9-ter CdS).`);
+            }
+            if (formData.drivingCategory === 'under18' && finalTasso > 0) {
+                const etaConseguimento = finalTasso <= 0.50 ? 19 : 21;
+                adempimenti.push(`Segnalazione per blocco conseguimento Patente Cat. B fino al compimento del ${etaConseguimento}° anno di età (Art. 186-bis, c. 2, ultimo periodo, CdS).`);
+            }
+            if (formData.tipoAccertamento === 'sanitario') {
+                adempimenti.push("Acquisire referto tossicologico-forense di conferma (secondo campione conservato presso struttura/laboratorio) e documentare la catena di custodia.");
             }
 
             // --- 8. Aggiornamento UI ---
             resultBox.style.display = 'block';
             document.getElementById('proceduralNarrative').innerHTML = proceduralNarrative;
             document.getElementById('gestioneVeicoloContent').innerHTML = gestioneVeicoloHTML;
-            document.getElementById('result-title').innerHTML = `<span>${titleText}</span><br><span class="text-lg font-medium text-gray-600">${normaViolata}</span>`;
+            document.getElementById('result-title').innerHTML = `<span>${titleText}</span><br><span class="text-base md:text-lg font-semibold text-blue-700">${normaViolata}</span>`;
             const sanctionsList = document.getElementById('sanctionsList');
             sanctionsList.innerHTML = ''; 
             const addSanction = (icon, title, text, explanation, infoKeys = []) => {
                 let infoIconsHTML = infoKeys.map(key => `<span class="info-icon" onclick="showInfoModal('${key}')">i</span>`).join('');
                 let titleHTML = `<div class="sanction-title"><strong class="text-gray-800">${title}</strong>${infoIconsHTML}</div>`;
-                let explanationHTML = explanation.length > 0 ? `<span class="sanction-explanation">(${explanation.join(', ')})</span>` : '';
-                sanctionsList.innerHTML += `<li class="sanctions-list-item">${icon}<div>${titleHTML}<p class="text-sm text-gray-600">${text}${explanationHTML}</p></div></li>`;
+                let explanationHTML = explanation.length > 0 ? `<div class="sanction-explanation mt-1">(${explanation.join(' • ')})</div>` : '';
+                sanctionsList.innerHTML += `<li class="sanctions-list-item">${icon}<div>${titleHTML}<div class="text-sm text-gray-700">${text}${explanationHTML}</div></div></li>`;
             };
             const icons = {
                 money: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
                 gavel: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600"><path d="m14 14-7.5 7.5"></path><path d="m18 10 -7.5 7.5"></path><path d="m6 6 7.5-7.5"></path><path d="m10 2 7.5 7.5"></path><path d="m7.5 16.5 7.5-7.5"></path><path d="M3 21l7.5-7.5"></path></svg>`,
                 card: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>`,
-                car: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C20.7 10.1 21 9.6 21 9v-2c0-1.1-.9-2-2-2h-3l-1.4-3.4c-.5-1-1.5-1.6-2.6-1.6H9.6c-1.1 0-2.1.6-2.6 1.6L5.6 7H3c-1.1 0-2 .9-2 2v2c0 .6.3 1.1.8 1.4C1.7 12.3 1 13.1 1 14v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle></svg>`
+                car: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C20.7 10.1 21 9.6 21 9v-2c0-1.1-.9-2-2-2h-3l-1.4-3.4c-.5-1-1.5-1.6-2.6-1.6H9.6c-1.1 0-2.1.6-2.6 1.6L5.6 7H3c-1.1 0-2 .9-2 2v2c0 .6.3 1.1.8 1.4C1.7 12.3 1 13.1 1 14v3c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle></svg>`
             };
             const formatYearsMonths = (months) => {
-                if (months < 12) return `${months} mes${months > 1 ? 'i' : 'e'}`;
-                const years = Math.floor(months / 12);
-                const remMonths = months % 12;
+                const rounded = Math.round(months * 10) / 10;
+                if (rounded < 12) return `${rounded} mes${rounded > 1 ? 'i' : 'e'}`;
+                const years = Math.floor(rounded / 12);
+                const remMonths = Math.round((rounded % 12) * 10) / 10;
                 let result = `${years} ann${years > 1 ? 'i' : 'o'}`;
                 if (remMonths > 0) result += ` e ${remMonths} mes${remMonths > 1 ? 'i' : 'e'}`;
                 return result;
             };
 
             let multaInfoKeys = [];
-            if (multaExplanation.includes("aumentata per Art. 186-bis")) multaInfoKeys.push('art186bis');
-            if (multaExplanation.includes("aumentata per orario notturno")) multaInfoKeys.push('aggravanteNotturna');
-            if (multaExplanation.includes("raddoppiata per sinistro")) multaInfoKeys.push('aggravanteSinistro');
+            if (isArt186bis) multaInfoKeys.push('art186bis');
+            if (formData.hasCodici6869) multaInfoKeys.push('alcolockInfo');
+            if (formData.infractionTime === 'night' && isPenal) multaInfoKeys.push('aggravanteNotturna');
+            if (formData.haSinistro) multaInfoKeys.push('aggravanteSinistro');
 
-            addSanction(icons.gavel, "Natura Illecito:", isPenal ? "Reato Contravvenzionale" : "Illecito Amministrativo", []);
-            addSanction(icons.money, `Sanzione Pecuniaria:`, `Da €${multaMin} a €${multaMax}.`, multaExplanation, multaInfoKeys);
+            addSanction(icons.gavel, "Natura Giuridica:", isPenal ? "<strong class='text-red-700'>Reato Contravvenzionale</strong> (Competenza Autorità Giudiziaria - Tribunale)" : "<strong class='text-blue-700'>Illecito Amministrativo</strong> (Competenza Prefetto)", []);
             
+            let pecuniariaText = `${isPenal ? 'Ammenda' : 'Sanzione amministrativa'} da <strong>${formatCurrency(multaMin)}</strong> a <strong>${formatCurrency(multaMax)}</strong>.`;
+            if (pmrSummaryText) {
+                pecuniariaText += `<br><span class="inline-block mt-1 px-2 py-1 bg-green-100 text-green-900 rounded font-medium text-xs">${pmrSummaryText}</span>`;
+            }
+            addSanction(icons.money, `Sanzione Pecuniaria:`, pecuniariaText, multaExplanation, multaInfoKeys);
+            
+            if (concorsoArt125Text) {
+                addSanction(icons.money, `Sanzione in Concorso (Codici 68/69):`, `<span class="text-indigo-900 font-medium">${concorsoArt125Text}</span>`, [], ['alcolockInfo']);
+            }
+
             if (arrestoMax > 0) {
-                 let arrestoText = arrestoMin === 0 ? `fino a ${formatYearsMonths(arrestoMax)}` : `da ${formatYearsMonths(arrestoMin)} a ${formatYearsMonths(arrestoMax)}`;
-                addSanction(icons.gavel, "Pena Detentiva:", `Arresto ${arrestoText}.`, arrestoExplanation, []);
+                let arrestoText = arrestoMin === 0 ? `fino a ${formatYearsMonths(arrestoMax)}` : `da ${formatYearsMonths(arrestoMin)} a ${formatYearsMonths(arrestoMax)}`;
+                addSanction(icons.gavel, "Pena Detentiva:", `Arresto <strong>${arrestoText}</strong>.`, arrestoExplanation, []);
             }
             
             let patenteInfoKeys = [];
-            if (patenteExplanation.includes("disposta per recidiva")) patenteInfoKeys.push('recidiva');
-            if (patenteExplanation.includes("disposta per incidente grave")) patenteInfoKeys.push('aggravanteSinistro');
+            if (formData.isRecidivo) patenteInfoKeys.push('recidiva');
+            if (formData.haSinistro) patenteInfoKeys.push('aggravanteSinistro');
+            if (sospensioneBreveGiorni > 0) patenteInfoKeys.push('sospensioneBreve');
             
-            if (sospensioneMax > 0 || isSospensionRevoked) {
+            if (isVelocipedeMonopattino) {
+                addSanction(icons.card, "Sanzioni sulla Patente e Punti:", `<strong>NON APPLICABILI</strong> (veicolo per la cui conduzione non è prescritta patente di guida - giurisprudenza costante Cassazione).`, [], ['veicoloInfo']);
+            } else if (sospensioneMax > 0 || isSospensionRevoked || sospensioneBreveGiorni > 0) {
                 let patenteText = "";
-                 if (isSospensionRevoked) {
-                    patenteText = isPatenteItaliana ? `**Revoca della Patente**.` : `**Revoca della Patente** (con provvedimento di inibizione alla guida).`;
+                if (isSospensionRevoked) {
+                    patenteText = isPatenteItaliana ? `<strong class="text-red-700">REVOCA DELLA PATENTE DI GUIDA</strong> (con ritiro immediato su strada).` : `<strong class="text-red-700">Inibizione alla guida in Italia</strong> (equivalente a revoca ex Art. 135/136-ter CdS).`;
+                } else if (sospensioneBreveGiorni > 0) {
+                    patenteText = `<strong class="text-amber-700">SOSPENSIONE BREVE IMMEDIATA SU STRADA per ${sospensioneBreveGiorni} giorni</strong> (Art. 218-ter, c. 1, lett. p, CdS - conducente con meno di 20 punti). Ritiro immediato della patente da conservare presso il Comando.`;
                 } else {
-                    let sospensioneText = `da ${formatYearsMonths(sospensioneMin)} a ${formatYearsMonths(sospensioneMax)}`;
-                    patenteText = isPatenteItaliana ? `Sospensione ${sospensioneText}.` : `Inibizione alla guida in Italia per ${sospensioneText}.`;
+                    let sospensioneText = `da <strong>${formatYearsMonths(sospensioneMin)}</strong> a <strong>${formatYearsMonths(sospensioneMax)}</strong>`;
+                    patenteText = isPatenteItaliana ? `Sospensione della patente ${sospensioneText} (con ritiro immediato).` : `Inibizione alla guida in Italia per ${sospensioneText} (con ritiro immediato).`;
                 }
-                 addSanction(icons.card, isPatenteItaliana ? "Sanzione sulla Patente:" : "Sanzione sul Documento di Guida:", patenteText, patenteExplanation, patenteInfoKeys);
+                addSanction(icons.card, isPatenteItaliana ? "Sanzione Accessoria sulla Patente:" : "Provvedimento sul Documento di Guida Estero:", patenteText, patenteExplanation, patenteInfoKeys);
+            } else if (!isPenal) {
+                addSanction(icons.card, "Sanzione Accessoria sulla Patente:", `Nessuna sospensione della patente (conducente con punteggio ≥ 20 punti: non scatta la sospensione breve ex Art. 218-ter CdS).`, [], ['sospensioneBreve']);
             }
             
-            if(punti > 0 && isPatenteItaliana) addSanction(icons.card, "Punti Patente:", `Decurtazione di ${punti} punti.`, formData.haSinistro ? ["raddoppiati per sinistro"] : [], formData.haSinistro ? ['aggravanteSinistro'] : []);
-            if (formData.isRecidivo && isPenal) addSanction(icons.car, "Obblighi Aggiuntivi:", `Installazione obbligatoria "Alcolock".`, [], ['recidiva']);
+            if (punti > 0 && !isVelocipedeMonopattino) {
+                addSanction(icons.card, "Decurtazione Punti (Art. 126-bis CdS):", `Decurtazione di <strong>${punti} punti</strong>${!isPatenteItaliana ? ' (su Anagrafe Nazionale Abilitati / CQC)' : ''}.`, puntiExplanation, []);
+            }
+
+            if (alcolockObbligoAnni > 0 && !isSospensionRevoked) {
+                addSanction(icons.car, "Obbligo Codici 68 e 69 – Alcolock (Art. 186, c. 9-ter CdS):", `A seguito della condanna penale, apposizione obbligatoria sulla patente dei codici unionali <strong>68 ("Niente alcool" - 0,0 g/L)</strong> e <strong>69 ("Obbligo dispositivo Alcolock EN 50436")</strong> per <strong>almeno ${alcolockObbligoAnni} anni</strong> decorrenti dalla restituzione della patente.`, ["Riforma L. 177/2024 e D.M. MIT 02/07/2025"], ['alcolockInfo']);
+            }
+
+            if (formData.drivingCategory === 'under18' && finalTasso > 0) {
+                const etaMin = finalTasso <= 0.50 ? 19 : 21;
+                addSanction(icons.card, "Limitazione Conseguimento Patente B (Minore di 18 anni):", `Il conducente minorenne non potrà conseguire la patente di guida di categoria B prima del compimento del <strong>${etaMin}° anno di età</strong> (Art. 186-bis, c. 2, CdS).`, [], ['art186bis']);
+            }
 
             document.getElementById('actsList').innerHTML = [...new Set(actsToDrawUp)].map(act => `<li>${act}</li>`).join('');
             document.getElementById('adempimentiList').innerHTML = adempimenti.map(ad => `<li>${ad}</li>`).join('');
@@ -1097,7 +1435,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js')
                     .then(registration => {
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
