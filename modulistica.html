@@ -16,17 +16,28 @@
             max-width: 210mm; /* Mantiene la larghezza massima di un A4 */
             min-height: 297mm;
             padding: 1rem; /* Padding ridotto per schermi piccoli */
-            margin: 1rem auto;
+            margin: 0.5rem auto;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             font-family: 'Times New Roman', serif;
             font-size: 11pt; /* La dimensione del font è ok per la stampa */
-            line-height: 1.8;
+            line-height: 1.6;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        @media (max-width: 480px) {
+            .page-container {
+                padding: 0.75rem;
+                font-size: 10pt;
+                line-height: 1.5;
+            }
         }
         /* Media query per schermi più grandi (tablet e desktop) */
         @media (min-width: 768px) {
             .page-container {
                 padding: 18mm; /* Ripristina il padding originale */
+                margin: 1rem auto;
+                line-height: 1.8;
             }
         }
         h2 { font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 1.5rem; text-transform: uppercase; }
@@ -34,12 +45,13 @@
         
         .editable-field {
             display: inline-block;
-            min-width: 80px;
+            min-width: 60px;
             border-bottom: 1px dotted #333;
-            padding: 0 2px;
+            padding: 1px 4px;
             background-color: #f8fafc;
             cursor: text;
             vertical-align: baseline;
+            touch-action: manipulation;
         }
         .editable-field:focus {
             outline: none;
@@ -98,18 +110,21 @@
         }
         .signature-line { border-top: 1px dotted #333; margin-top: 2.5rem; }
         
-        /* MODIFICA: Contenitore pulsante di stampa reso responsivo */
+        /* MODIFICA: Contenitore pulsanti di stampa e chiusura responsivo */
         .print-button-container {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
             z-index: 1000;
-            text-align: center;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
             border-top: 1px solid #ddd;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
         }
         @media (min-width: 768px) {
             .print-button-container {
@@ -121,13 +136,16 @@
                 backdrop-filter: none;
                 padding: 0;
                 border-top: none;
+                box-shadow: none;
             }
         }
         .print-button-container button {
-            width: 100%;
+            flex: 1;
+            max-width: 200px;
         }
          @media (min-width: 768px) {
             .print-button-container button {
+                flex: none;
                 width: auto;
             }
          }
@@ -148,11 +166,16 @@
         }
     </style>
 </head>
-<body class="pb-24 md:pb-0"> <!-- Aggiunto padding-bottom per non sovrapporre il bottone -->
+<body class="pb-24 md:pb-0">
 
     <div class="print-button-container">
-        <button onclick="window.print()" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition">
-            Stampa / Salva PDF
+        <button onclick="window.print()" class="bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg shadow hover:bg-blue-700 transition text-sm flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Stampa / PDF
+        </button>
+        <button onclick="window.close(); if(!window.closed) window.location.href='index.html';" class="bg-gray-700 text-white font-bold py-2.5 px-4 rounded-lg shadow hover:bg-gray-800 transition text-sm flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Chiudi
         </button>
     </div>
 
