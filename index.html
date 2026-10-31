@@ -407,7 +407,7 @@
             },
             sospensioneBreve: {
                 title: 'Art. 218-ter CdS (L. 177/2024) - Sospensione Breve su Strada',
-                text: 'Per la violazione dell\'Art. 186-bis, comma 2 (tasso > 0,00 e ≤ 0,50 g/L), l\'art. 218-ter, c. 1, lett. p) prevede la SOSPENSIONE BREVE immediata della patente applicata direttamente dall\'agente accertatore se il conducente ha meno di 20 punti:\n• Da 10 a 19 punti: sospensione di 7 giorni (14 giorni se ha provocato un incidente).\n• Da 1 a 9 punti: sospensione di 15 giorni (30 giorni se ha provocato un incidente).\nLa patente è ritirata immediatamente e conservata presso l\'Ufficio/Comando.'
+                text: 'Per la violazione dell\'Art. 186-bis, comma 2 (tasso > 0,00 e ≤ 0,50 g/L), l\'art. 218-ter, c. 1, lett. p) prevede la SOSPENSIONE BREVE immediata della patente applicata direttamente dall\'agente accertatore se il conducente ha meno di 20 punti:\n• Da 10 a 19 punti: sospensione di 7 giorni (14 giorni se ha provocato un incidente).\n• Da 1 a 9 punti: sospensione di 15 giorni (30 giorni se ha provocato un incidente).\nLa patente è ritirata immediatamente e conservata presso l\'Ufficio/Comando.\n• PATENTE ESTERA (Circolare Ministero Interno prot. 19441 del 25/06/2025): L\'art. 218-ter c. 4 si applica anche ai titolari di patente estera. Su richiesta dell\'interessato che dichiara di voler lasciare immediatamente il territorio nazionale, il documento può essere restituito anticipatamente.'
             },
             veicoloInfo: {
                 title: 'Regime del Veicolo: Motocicli/Ciclomotori, Mezzi Pesanti e Velocipedi',
@@ -628,6 +628,8 @@
                 document.getElementById('result-box').style.display = 'none';
                 currentResultData = {};
                 setTimeout(() => {
+                    measurementContainer.querySelectorAll('input').forEach(input => input.disabled = false);
+                    tassoSanitarioInput.disabled = false;
                     toggleAccertamentoFields();
                     toggleDifensoreDetails();
                     handleContestoPrelievoChange();
@@ -1228,7 +1230,8 @@
                 if (formData.firstMeasurementTime && formData.secondMeasurementTime) {
                     const t1 = new Date(`1970-01-01T${formData.firstMeasurementTime}`);
                     const t2 = new Date(`1970-01-01T${formData.secondMeasurementTime}`);
-                    const diff = Math.abs(t2 - t1) / 60000;
+                    let diff = Math.abs(t2 - t1) / 60000;
+                    if (diff > 720) diff = 1440 - diff;
                     proceduralNarrative += `  - Intervallo tra le due prove: <strong>${diff} minuti</strong> (${diff >= 5 ? '<span class="text-green-700 font-semibold">conforme ≥ 5 min ex art. 379 Reg. CdS</span>' : '<span class="text-red-600 font-bold">ATTENZIONE: inferiore a 5 min! Ripetere a distanza di almeno 5 minuti</span>'}).\n`;
                 }
                 proceduralNarrative += `  - <strong>Valore probatorio considerato (più favorevole): ${finalTasso.toFixed(2)} g/L.</strong>\n`;
@@ -1314,10 +1317,19 @@
                 actsToDrawUp.push("Verbale di Affidamento del Veicolo a Persona Idonea (Art. 186, c. 2-septies CdS)");
             }
             
+            formData.isSequestroConfisca = gestioneVeicoloHTML.includes('SEQUESTRO AMMINISTRATIVO');
+            formData.isFermoAmministrativo = gestioneVeicoloHTML.includes('FERMO AMMINISTRATIVO');
+            formData.requiresAffidamento = gestioneVeicoloHTML.includes('AFFIDAMENTO');
+            formData.isMotociclo = isMotociclo;
+
             // --- Adempimenti Successivi ---
             let adempimenti = [];
             if (isPenal) {
-                adempimenti.push("Trasmissione Comunicazione di Notizia di Reato (C.N.R. ex art. 347 c.p.p.) alla Procura della Repubblica (allegando scontrini etilometro / referti sanitari, verbale art. 354 c.p.p. e avviso art. 114 disp. att. c.p.p.).");
+                if (formData.drivingCategory === 'under18') {
+                    adempimenti.push("Trasmissione Comunicazione di Notizia di Reato (C.N.R. ex art. 347 c.p.p.) alla <strong>Procura della Repubblica presso il Tribunale per i Minorenni (D.P.R. 448/1988)</strong>, con tempestiva notifica ed affidamento agli esercenti la potestà genitoriale e nomina difensore abilitato alle difese minorili (art. 29 disp. att. D.P.R. 448/1988).");
+                } else {
+                    adempimenti.push("Trasmissione Comunicazione di Notizia di Reato (C.N.R. ex art. 347 c.p.p.) alla Procura della Repubblica presso il Tribunale Ordinario (allegando scontrini etilometro / referti sanitari, verbale art. 354 c.p.p. e avviso art. 114 disp. att. c.p.p.).");
+                }
             }
             if (!isVelocipedeMonopattino) {
                 if (sospensioneMax > 0 || isSospensionRevoked) {

@@ -397,6 +397,163 @@ function renderModules(data, container) {
         `;
     }
 
+    // --- GENERA MODULO SEQUESTRO AMMINISTRATIVO AI FINI DELLA CONFISCA ---
+    if (data.isSequestroConfisca) {
+        modulesHtml += `
+            <div class="page-container">
+                <div class="header">ART. 213 / 224-TER CDS</div>
+                <h2>VERBALE DI SEQUESTRO AMMINISTRATIVO DEL VEICOLO AI FINI DELLA CONFISCA<br>(Artt. 213, 224-ter e 186 Codice della Strada${data.isMotociclo ? ' - Art. 213 c. 2-sexies' : ''})</h2>
+                
+                <p class="text-justify">
+                    L'anno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Anno"></span>&nbsp;il giorno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Giorno e Mese"></span>&nbsp;alle ore&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Ora"></span>&nbsp;in&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Comune, via e numero civico"></span>,
+                    i sottoscritti Ufficiali/Agenti di Polizia Giudiziaria appartenenti al Comando/Ufficio in intestazione,
+                    avendo proceduto nei confronti di&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cognome e Nome Conducente"></span>,
+                    nato a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo di nascita"></span>&nbsp;il&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data"></span>,
+                    residente a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Comune di residenza, via"></span>,
+                    per la violazione di cui all'<strong>${data.normaViolata || 'art. 186 CdS'}</strong> alla guida del veicolo:
+                </p>
+
+                <p class="mt-2 text-justify">
+                    Tipo:&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Autovettura / Motoveicolo"></span>&nbsp;
+                    Marca e Modello:&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Marca e modello"></span>&nbsp;
+                    Targa:&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Targa"></span>&nbsp;
+                    Telaio n.:&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Numero Telaio"></span>&nbsp;
+                    di proprietà di:&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Proprietario o Intestatario al PRA"></span>;
+                </p>
+
+                <p class="text-justify mt-3">
+                    DATO ATTO che il predetto veicolo è assoggettato a <strong>CONFISCA OBBLIGATORIA</strong> ai sensi ${data.isMotociclo ? "dell'art. 213, comma 2-sexies, CdS (motoveicolo/ciclomotore adoperato per commettere reato alcolimetrico)" : "dell'art. 186, comma 2 lett. c) o comma 7, e dell'art. 224-ter CdS"} non appartenendo a persona estranea al reato;
+                </p>
+
+                <h4 class="font-bold text-center my-3">SOTTOPONGONO A SEQUESTRO AMMINISTRATIVO</h4>
+                <p class="text-justify">
+                    il veicolo sopra descritto mediante apposizione dei sigilli di legge e ritiro del documento di circolazione.
+                </p>
+
+                <h4 class="font-bold my-2">CUSTODIA DEL VEICOLO:</h4>
+                <div class="my-2 pl-4 text-justify">
+                    <div class="checkbox-grid">
+                        <div class="checkbox">${data.isMotociclo ? '&nbsp;' : 'X'}</div>
+                        <div>Affidato in custodia al Sig.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cognome e Nome Custode"></span>&nbsp;(proprietario/trasgressore), il quale assume l'obbligo di custodirlo e non rimuoverlo dal luogo privato non soggetto a pubblico passaggio sito in&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Indirizzo esatto del luogo di custodia"></span>.</div>
+                    </div>
+                    <div class="checkbox-grid mt-2">
+                        <div class="checkbox">${data.isMotociclo ? 'X' : '&nbsp;'}</div>
+                        <div>Affidato in custodia al Custode-Acquirente convenzionato (o depositeria autorizzata)&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Denominazione e sede depositeria"></span>&nbsp;${data.isMotociclo ? '(obbligatorio per i primi 30 gg ex art. 213, c. 2-sexies CdS)' : '(per indisponibilità/inidoneità/rifiuto del trasgressore)'}.</div>
+                    </div>
+                </div>
+
+                <p class="text-justify text-xs mt-2 text-gray-700">
+                    Il custode viene reso edotto degli obblighi di custodia e delle sanzioni penali previste dagli artt. 334 (sottrazione o danneggiamento di cose sottoposte a sequestro) e 335 (violazione colposa dei doveri di custodia) del Codice Penale, nonché dell'art. 213 CdS in caso di circolazione abusiva del veicolo sequestrato.
+                </p>
+
+                <div class="signature-section mt-4">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Il Custode nominato</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Il Conducente / Trasgressore</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>I Verbalizzanti</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- GENERA MODULO FERMO AMMINISTRATIVO 180 GG PER SINISTRO ---
+    if (data.isFermoAmministrativo) {
+        modulesHtml += `
+            <div class="page-container">
+                <div class="header">ART. 186 c. 2-bis / 214 CDS</div>
+                <h2>VERBALE DI FERMO AMMINISTRATIVO DEL VEICOLO PER 180 GIORNI<br>(Art. 186, comma 2-bis, Art. 224-ter, c. 3 e Art. 214 Codice della Strada)</h2>
+                
+                <p class="text-justify">
+                    L'anno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Anno"></span>&nbsp;il giorno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Giorno e Mese"></span>&nbsp;alle ore&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Ora"></span>&nbsp;in&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo"></span>,
+                    i sottoscritti appartenenti al Comando/Ufficio in intestazione, avendo accertato che il conducente Sig.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cognome e Nome Conducente"></span>,
+                    alla guida del veicolo tipo&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Tipo"></span>&nbsp;marca/modello&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Marca Modello"></span>&nbsp;targa&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Targa"></span>,
+                    in stato di ebbrezza alcolica (tasso <strong>${(data.finalTasso || 0).toFixed(2)} g/L</strong>) ha provocato un <strong>INCIDENTE STRADALE</strong>;
+                </p>
+
+                <p class="text-justify mt-3">
+                    Visto l'<strong>art. 186, comma 2-bis del Codice della Strada</strong>, che dispone il <strong>fermo amministrativo del veicolo per centottanta giorni</strong>, salvo che il veicolo appartenga a persona estranea all'illecito;
+                </p>
+
+                <h4 class="font-bold text-center my-3">DISPONGONO</h4>
+                <p class="text-justify">
+                    il <strong>FERMO AMMINISTRATIVO DEL VEICOLO PER GIORNI 180 (CENTOTTANTA)</strong> a decorrere dalla data odierna, con contestuale ritiro della carta di circolazione che viene trattenuta agli atti.
+                </p>
+
+                <p class="text-justify mt-2">
+                    Il veicolo viene affidato in custodia senza oneri per l'Amministrazione al Sig.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cognome e Nome Custode"></span>, il quale dichiara di disporre di idoneo luogo di ricovero non soggetto a pubblico passaggio sito in&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo di custodia"></span>, assumendosi gli obblighi di legge e venendo avvisato del divieto assoluto di circolazione (art. 214, c. 8, CdS) e delle sanzioni ex artt. 334 e 335 C.P.
+                </p>
+
+                <div class="signature-section mt-6">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Il Custode / Conducente</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>I Verbalizzanti</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- GENERA MODULO AFFIDAMENTO DEL VEICOLO A PERSONA IDONEA ---
+    if (data.requiresAffidamento) {
+        modulesHtml += `
+            <div class="page-container">
+                <div class="header">ART. 186, C. 2-SEPTIES CDS</div>
+                <h2>VERBALE DI AFFIDAMENTO DEL VEICOLO A PERSONA IDONEA<br>(Art. 186, comma 2-septies Codice della Strada)</h2>
+                
+                <p class="text-justify">
+                    L'anno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Anno"></span>&nbsp;il giorno&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Giorno e Mese"></span>&nbsp;alle ore&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Ora"></span>&nbsp;in&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo"></span>,
+                    i sottoscritti Ufficiali/Agenti di Polizia Giudiziaria appartenenti a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Comando/Ufficio"></span>,
+                    hanno proceduto all'accertamento della violazione di cui all'art. 186 CdS nei confronti del Sig./Sig.ra&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cognome e Nome Conducente"></span>,
+                    conducente del veicolo tipo&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Tipo"></span>&nbsp;marca/modello&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Marca Modello"></span>&nbsp;targa&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Targa"></span>.
+                </p>
+
+                <p class="text-justify mt-3">
+                    Considerato che, ai sensi dell'art. 186, comma 2-septies, CdS, il veicolo con il quale è stato commesso l'illecito non può essere condotto dal trasgressore che si trova in stato di alterazione e non sussistono le condizioni per il sequestro o il fermo del veicolo stesso;
+                </p>
+
+                <h4 class="font-bold text-center my-3">AFFIDANO IL VEICOLO</h4>
+                <p class="text-justify">
+                    al Sig./Sig.ra&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cognome e Nome Affidatario"></span>,
+                    nato/a a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Luogo nascita"></span>&nbsp;il&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Data nascita"></span>,
+                    residente a&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Comune residenza, via"></span>,
+                    titolare di patente di guida cat.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Cat."></span>&nbsp;n.&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Numero Patente"></span>&nbsp;rilasciata da&nbsp;<span class="editable-field" contenteditable="true" data-placeholder="Ente rilascio"></span>&nbsp;in corso di validità.
+                </p>
+
+                <p class="text-justify mt-3">
+                    I verbalizzanti danno atto di aver preventivamente accertato l'idoneità psicofisica della persona affidataria (risultata negativa al controllo preliminare/alcolemico).
+                    La persona affidataria dichiara di accettare l'affidamento e di condurre il veicolo fino a destinazione nel rispetto delle norme sulla circolazione stradale.
+                </p>
+
+                <div class="signature-section mt-6">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Il Conducente</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>L'Affidatario</p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>I Verbalizzanti</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     container.innerHTML = modulesHtml;
 }
 
